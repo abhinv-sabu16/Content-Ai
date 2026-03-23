@@ -21,7 +21,7 @@ export const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 export const UserModel = {
   async findByEmail(email) {
-    return User.findOne({ email: email.toLowerCase() }).lean();
+    return User.findOne({ email: email.toLowerCase() }).select("+password").lean();
   },
 
   async findById(id) {
@@ -81,7 +81,10 @@ export const UserModel = {
 
   async verifyPassword(user, password) {
     if (!user.password) return false;
-    const fullUser = await User.findById(user._id || user.id).select("+password").lean();
+    // user may be sanitized (has .id) or raw (has ._id)
+    const id = user._id || user.id;
+    const fullUser = await User.findById(id).select("+password").lean();
+    if (!fullUser?.password) return false;
     return bcrypt.compare(password, fullUser.password);
   },
 
