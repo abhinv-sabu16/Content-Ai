@@ -34,6 +34,8 @@ app.use(cors({
       process.env.CLIENT_URL,
       "http://localhost:5173",
       "http://localhost:3000",
+      "https://content-jn2fss81t-abhinav-sabus-projects.vercel.app",
+      
     ].filter(Boolean);
 
     // Exact match
