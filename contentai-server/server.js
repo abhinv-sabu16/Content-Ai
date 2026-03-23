@@ -28,12 +28,20 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
 app.use(cors({
   origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
     const allowed = [
       process.env.CLIENT_URL,
       "http://localhost:5173",
       "http://localhost:3000",
     ].filter(Boolean);
-    if (!origin || allowed.includes(origin)) return callback(null, true);
+
+    // Exact match
+    if (allowed.includes(origin)) return callback(null, true);
+
+    // Allow all Vercel preview deployments
+    if (origin.match(/https:\/\/.*\.vercel\.app$/)) return callback(null, true);
+
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,
