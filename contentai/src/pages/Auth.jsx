@@ -12,23 +12,23 @@ const FEATURES = [
 function InputField({ icon: Icon, type, placeholder, value, onChange, showToggle, onToggle, showPassword, error }) {
   return (
     <div className="relative">
-      <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 pointer-events-none z-10" />
+      <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
       <input
         type={showToggle ? (showPassword ? "text" : "password") : type}
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className={`w-full pl-11 ${showToggle ? "pr-11" : "pr-4"} py-3 rounded-xl text-sm text-white/90 placeholder-white/25 transition-all border ${
+        className={`w-full pl-11 ${showToggle ? "pr-11" : "pr-4"} py-3 rounded-xl text-sm text-gray-900 placeholder-gray-500 transition-all border ${
           error
-            ? "border-red-500/50 bg-red-500/5 focus:border-red-400"
-            : "border-white/8 bg-white/4 focus:border-ember-500/60 focus:bg-white/6"
+            ? "border-red-500/50 bg-red-50 focus:border-red-400"
+            : "border-gray-200 bg-white focus:border-ember-500/50"
         }`}
         style={{ outline: "none" }}
         autoComplete={type === "password" ? "current-password" : type === "email" ? "email" : "name"}
       />
       {showToggle && (
         <button type="button" onClick={onToggle}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25 hover:text-white/60 transition-colors z-10">
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10">
           {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
       )}
