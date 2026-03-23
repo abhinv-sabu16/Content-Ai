@@ -25,6 +25,7 @@ function Spinner() {
 
 export default function App() {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
@@ -46,6 +47,11 @@ export default function App() {
 
     const params = new URLSearchParams(window.location.search);
     if (params.get("auth") === "success") window.history.replaceState({}, "", "/");
+
+    // Close mobile sidebar on navigation
+    const handlePopState = () => setIsMobileSidebarOpen(false);
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
   const handleAuth = (user, isNew = false) => {
@@ -76,7 +82,16 @@ export default function App() {
   };
 
   const openProfile = () => setShowProfile(true);
-  const toggle = () => setCollapsed(c => !c);
+  
+  const toggle = () => {
+    if (window.innerWidth < 1024) {
+      setIsMobileSidebarOpen(o => !o);
+    } else {
+      setCollapsed(c => !c);
+    }
+  };
+
+  const closeMobileSidebar = () => setIsMobileSidebarOpen(false);
 
   if (loading) return <Spinner />;
   if (!session) return <Auth onAuth={handleAuth} />;
@@ -93,11 +108,22 @@ export default function App() {
       <div className="flex min-h-screen bg-ink-950">
         <Sidebar
           collapsed={collapsed}
+          isOpen={isMobileSidebarOpen}
+          onClose={closeMobileSidebar}
           session={session}
           onLogout={() => setShowLogoutPopup(true)}
           onOpenProfile={openProfile}
         />
-        <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        
+        {/* Mobile Backdrop */}
+        {isMobileSidebarOpen && (
+          <div 
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden animate-fade-in"
+            onClick={closeMobileSidebar}
+          />
+        )}
+
+        <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative">
           <Routes>
             <Route path="/"          element={<Dashboard     {...pageProps} />} />
             <Route path="/generate"  element={<Generator     {...pageProps} />} />

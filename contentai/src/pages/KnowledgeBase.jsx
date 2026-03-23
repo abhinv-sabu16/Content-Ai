@@ -273,6 +273,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
   const [sourcesLoading, setSourcesLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [showProjectList, setShowProjectList] = useState(false);
 
   // Load projects
   useEffect(() => {
@@ -335,13 +336,24 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <TopBar onToggleSidebar={onToggleSidebar} title="Knowledge Base"
-        subtitle="RAG-powered document intelligence"
+        subtitle={selectedProject ? selectedProject.name : "Select a project"}
         session={session} onOpenProfile={onOpenProfile} />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
 
-        {/* ── Left: Project list ── */}
-        <div className="w-72 flex-shrink-0 flex flex-col border-r border-white/5 bg-ink-900 overflow-hidden">
+        {/* ── Left: Project list — Drawer on mobile ── */}
+        <div className={`
+          absolute inset-y-0 left-0 z-20 w-72 border-r border-white/5 bg-ink-900 flex flex-col transition-all duration-300 lg:relative lg:translate-x-0
+          ${showProjectList ? "translate-x-0" : "-translate-x-full"}
+          lg:flex flex-shrink-0
+        `}>
+          <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5">
+            <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Knowledge Bases</span>
+            <button onClick={() => setShowProjectList(false)} className="text-white/30 hover:text-white/60">
+              <X size={16} />
+            </button>
+          </div>
+
           <div className="p-4 border-b border-white/5">
             <button onClick={() => setShowCreate(true)}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95 hover:opacity-90"
@@ -361,7 +373,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
             ) : (
               projects.map(project => (
                 <button key={project.id}
-                  onClick={() => setSelectedProject(project)}
+                  onClick={() => { setSelectedProject(project); setShowProjectList(false); }}
                   className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border mb-1.5 transition-all group ${
                     selectedProject?.id === project.id
                       ? "border-ember-500/40 bg-ember-500/8"
@@ -394,33 +406,48 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
           </div>
         </div>
 
+        {/* Mobile Backdrop */}
+        {showProjectList && (
+          <div className="fixed inset-0 z-10 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setShowProjectList(false)} />
+        )}
+
         {/* ── Right: Project detail ── */}
         <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {!selectedProject ? (
-            <EmptyState icon={BookOpen} title="Select a project"
-              subtitle="Choose a knowledge base from the left, or create a new one to start adding documents." />
+            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+                style={{ background: "rgba(255,107,53,0.1)", border: "1px solid rgba(255,107,53,0.2)" }}>
+                <BookOpen size={28} className="text-ember-400" />
+              </div>
+              <h3 className="font-display font-bold text-white text-xl mb-2">Select a Project</h3>
+              <p className="text-white/40 text-sm max-w-xs mb-6">Choose a knowledge base to manage documents, or create a new one.</p>
+              <button 
+                onClick={() => setShowProjectList(true)}
+                className="lg:hidden flex items-center gap-2 px-6 py-2.5 rounded-xl bg-ember-500/10 text-ember-400 border border-ember-500/20 font-semibold text-sm transition-all active:scale-95"
+              >
+                View Projects
+              </button>
+            </div>
           ) : (
             <>
               {/* Header */}
-              <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
-                <div>
-                  <h2 className="font-display font-bold text-white">{selectedProject.name}</h2>
-                  {selectedProject.description && (
-                    <p className="text-xs text-white/35 mt-0.5">{selectedProject.description}</p>
-                  )}
+              <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between flex-shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col">
+                    <h2 className="font-display font-bold text-white leading-none">{selectedProject.name}</h2>
+                    {selectedProject.description && (
+                      <p className="text-xs text-white/35 mt-1 hidden sm:block">{selectedProject.description}</p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-white/30">
-                  <span className="px-2.5 py-1 rounded-full"
-                    style={{ background: "rgba(255,107,53,0.1)", color: "#ff6b35" }}>
-                    {sources.length} source{sources.length !== 1 ? "s" : ""}
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full bg-white/5">
-                    ID: <span className="font-mono">{selectedProject.id.slice(0, 8)}</span>
-                  </span>
+                <div className="flex items-center gap-2 text-xs">
+                  <button onClick={() => setShowProjectList(true)} className="lg:hidden px-3 py-1.5 rounded-lg bg-white/5 text-xs text-white/40">
+                    KBs
+                  </button>
                 </div>
               </div>
 
-              <div className="flex-1 overflow-auto p-6 flex gap-6">
+              <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
 
                 {/* Upload zone */}
                 <div className="w-80 flex-shrink-0">

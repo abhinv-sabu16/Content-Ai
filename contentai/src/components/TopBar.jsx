@@ -14,9 +14,9 @@ export default function TopBar({ onToggleSidebar, title, subtitle, session, onOp
         >
           <PanelLeft size={16} />
         </button>
-        <div>
-          <h1 className="font-display font-semibold text-white text-base leading-none">{title}</h1>
-          {subtitle && <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>}
+        <div className="min-w-0 flex-1">
+          <h1 className="font-display font-semibold text-white text-base leading-none truncate">{title}</h1>
+          {subtitle && <p className="text-xs text-white/40 mt-0.5 truncate">{subtitle}</p>}
         </div>
       </div>
 

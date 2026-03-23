@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Wand2, History, Settings, Zap, LogOut, BookOpen, Shield } from "lucide-react";
+import { LayoutDashboard, Wand2, History, Settings, Zap, LogOut, BookOpen, Shield, X } from "lucide-react";
 
-export default function Sidebar({ collapsed, session, onLogout, onOpenProfile }) {
+export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout, onOpenProfile }) {
   const initials = session?.name
     ? session.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()
     : "U";
@@ -18,26 +18,34 @@ export default function Sidebar({ collapsed, session, onLogout, onOpenProfile })
 
   return (
     <aside
-      className="flex flex-col border-r border-white/5 bg-ink-900 transition-all duration-300 flex-shrink-0"
-      style={{ width: collapsed ? "72px" : "220px", minHeight: "100vh" }}
+      className={`flex flex-col border-r border-white/5 bg-ink-900 transition-all duration-300 flex-shrink-0 z-50
+        fixed inset-y-0 left-0 lg:sticky lg:top-0 lg:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+      `}
+      style={{ width: collapsed ? "72px" : "220px", height: "100vh" }}
     >
       {/* Logo */}
-      <div className="flex items-center gap-3 px-4 py-5 border-b border-white/5">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-          style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-          <Zap size={16} fill="white" color="white" />
+      <div className="flex items-center justify-between px-4 py-5 border-b border-white/5">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
+            <Zap size={16} fill="white" color="white" />
+          </div>
+          {!collapsed && (
+            <span className="font-display font-bold text-white tracking-tight text-lg leading-none">
+              ContentAI
+            </span>
+          )}
         </div>
-        {!collapsed && (
-          <span className="font-display font-bold text-white tracking-tight text-lg leading-none">
-            ContentAI
-          </span>
-        )}
+        {/* Mobile close button */}
+        <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
+          <X size={18} />
+        </button>
       </div>
 
       {/* Nav */}
       <nav className="flex flex-col gap-1 p-3 flex-1">
         {navItems.map(({ to, icon: Icon, label, admin }) => (
-          <NavLink key={to} to={to} end={to === "/"}
+          <NavLink key={to} to={to} end={to === "/"} onClick={() => window.innerWidth < 1024 && onClose()}
             className={({ isActive }) =>
               `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-150 relative
                ${isActive

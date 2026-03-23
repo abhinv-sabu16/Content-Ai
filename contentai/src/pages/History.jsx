@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Trash2, Copy, Check, Search, Calendar, Filter } from "lucide-react";
+import { Trash2, Copy, Check, Search, Calendar, Filter, X } from "lucide-react";
 import TopBar from "../components/TopBar";
 import { getHistory, deleteFromHistory, clearHistory } from "../lib/history";
 import { TOOLS } from "../lib/tools";
@@ -10,6 +10,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
   const [selectedId, setSelectedId] = useState(null);
   const [copied, setCopied] = useState(false);
   const [filterTool, setFilterTool] = useState("all");
+  const [showList, setShowList] = useState(false);
 
   useEffect(() => { setHistory(getHistory()); }, []);
 
@@ -39,9 +40,19 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
     <div className="flex flex-col flex-1 min-h-0">
       <TopBar onToggleSidebar={onToggleSidebar} title="History" subtitle={`${history.length} generations saved`} session={session} onOpenProfile={onOpenProfile} />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* List */}
-        <div className="w-80 flex-shrink-0 flex flex-col border-r border-white/5 overflow-hidden bg-ink-900">
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* List — Drawer on mobile ── */}
+        <div className={`
+          absolute inset-y-0 left-0 z-20 w-80 flex-shrink-0 flex flex-col border-r border-white/5 bg-ink-900 transition-all duration-300 lg:relative lg:translate-x-0
+          ${showList ? "translate-x-0" : "-translate-x-full"}
+          lg:flex flex-shrink-0
+        `}>
+          <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5">
+            <span className="text-xs font-bold text-white/40 uppercase tracking-widest">History</span>
+            <button onClick={() => setShowList(false)} className="text-white/30 hover:text-white/60">
+              <X size={16} />
+            </button>
+          </div>
           <div className="p-4 border-b border-white/5 flex flex-col gap-3">
             <div className="relative">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
@@ -71,7 +82,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                 const tool = TOOLS.find(t => t.id === item.toolId);
                 return (
                   <button key={item.id}
-                    onClick={() => setSelectedId(item.id === selectedId ? null : item.id)}
+                    onClick={() => { setSelectedId(item.id === selectedId ? null : item.id); setShowList(false); }}
                     className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border transition-all group ${item.id === selectedId
                       ? "border-ember-500/40 bg-ember-500/8"
                       : "border-white/5 bg-ink-800 hover:border-white/10"}`}>
@@ -101,12 +112,20 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
           )}
         </div>
 
+        {/* Mobile Backdrop */}
+        {showList && (
+          <div className="fixed inset-0 z-10 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setShowList(false)} />
+        )}
+
         {/* Detail */}
         <div className="flex-1 flex flex-col min-h-0">
           {!selected ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center text-white/20 gap-3">
               <Calendar size={32} className="opacity-30" />
               <p className="text-sm">Select an item to view its output</p>
+              <button onClick={() => setShowList(true)} className="lg:hidden px-4 py-2 rounded-lg bg-ember-500/10 text-ember-400 border border-ember-500/20 text-xs font-semibold">
+                View History
+              </button>
             </div>
           ) : (
             <>
@@ -119,6 +138,9 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <button onClick={() => setShowList(true)} className="lg:hidden px-3 py-1.5 rounded-lg bg-white/5 text-xs text-white/40">
+                    List
+                  </button>
                   <button onClick={() => handleDelete(selected.id, { stopPropagation: () => {} })}
                     className="flex items-center gap-1.5 text-xs text-white/30 hover:text-red-400 px-2.5 py-1.5 rounded-lg hover:bg-red-400/10 transition-all">
                     <Trash2 size={13} /> Delete
