@@ -105,8 +105,8 @@ router.delete("/delete-account", requireAuth, async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
     };
-    res.clearCookie("access_token", { ...cookieOpts, path: "/" });
-    res.clearCookie("refresh_token", { ...cookieOpts, path: "/auth/refresh" });
+    res.clearCookie("access_token", { httpOnly: true, secure: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", path: "/" });
+    res.clearCookie("refresh_token", { httpOnly: true, secure: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", path: "/" });
 
     res.json({ message: "Account deleted successfully." });
   } catch (err) {

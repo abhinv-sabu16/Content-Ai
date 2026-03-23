@@ -13,9 +13,9 @@ import {
 } from "../utils/tokens.js";
 import { validateRegister, validateLogin } from "../middleware/validate.js";
 import { requireAuth } from "../middleware/auth.js";
- 
+
 const router = Router();
- 
+
 // ── Rate limiting ────────────────────────────────────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
@@ -24,23 +24,23 @@ const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
- 
+
 // ── Helper: set both cookies and respond ─────────────────────
 async function issueTokens(res, user) {
   const accessToken = generateAccessToken(user);
   const refreshToken = await generateRefreshToken(user.id);
- 
+
   res.cookie("access_token", accessToken, ACCESS_COOKIE_OPTS);
   res.cookie("refresh_token", refreshToken, REFRESH_COOKIE_OPTS);
- 
+
   return { accessToken, refreshToken };
 }
- 
+
 // ── POST /auth/register ───────────────────────────────────────
 router.post("/register", authLimiter, validateRegister, async (req, res) => {
   try {
     const { name, email, password } = req.body;
- 
+
     // Check if email already exists before attempting create
     const existing = await UserModel.findByEmail(email);
     if (existing) {
@@ -57,7 +57,7 @@ router.post("/register", authLimiter, validateRegister, async (req, res) => {
         code: "EMAIL_EXISTS",
       });
     }
- 
+
     const user = await UserModel.create({ name, email, password });
     await issueTokens(res, user);
     res.status(201).json({ user });
@@ -66,17 +66,17 @@ router.post("/register", authLimiter, validateRegister, async (req, res) => {
     res.status(500).json({ error: "Registration failed. Please try again." });
   }
 });
- 
+
 // ── POST /auth/login ──────────────────────────────────────────
 router.post("/login", authLimiter, validateLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
- 
+
     const user = await UserModel.findByEmail(email);
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
- 
+
     // Google-only account — no password set
     if (user.googleId && !user.password) {
       return res.status(401).json({
@@ -84,12 +84,13 @@ router.post("/login", authLimiter, validateLogin, async (req, res) => {
         code: "GOOGLE_ACCOUNT",
       });
     }
- 
+
     const valid = await UserModel.verifyPassword(user, password);
     if (!valid) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
- 
+
+    await UserModel.updateLastLogin(user.id);
     const safeUser = UserModel.sanitize(user);
     await issueTokens(res, safeUser);
     res.json({ user: safeUser });
@@ -98,59 +99,59 @@ router.post("/login", authLimiter, validateLogin, async (req, res) => {
     res.status(500).json({ error: "Login failed. Please try again." });
   }
 });
- 
+
 // ── POST /auth/logout ─────────────────────────────────────────
 router.post("/logout", requireAuth, async (req, res) => {
   try {
     const refreshToken = req.cookies?.refresh_token;
     if (refreshToken) await revokeRefreshToken(refreshToken);
- 
-    res.clearCookie("access_token", { path: "/" });
-    res.clearCookie("refresh_token", { path: "/auth/refresh" });
+
+    res.clearCookie("access_token", { httpOnly: true, secure: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", path: "/" });
+    res.clearCookie("refresh_token", { httpOnly: true, secure: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", path: "/" });
     res.json({ message: "Logged out successfully." });
   } catch (err) {
     console.error("[logout]", err);
     res.status(500).json({ error: "Logout failed." });
   }
 });
- 
+
 // ── POST /auth/logout-all ─────────────────────────────────────
 router.post("/logout-all", requireAuth, async (req, res) => {
   try {
     await revokeAllUserTokens(req.user.sub);
-    res.clearCookie("access_token", { path: "/" });
-    res.clearCookie("refresh_token", { path: "/auth/refresh" });
+    res.clearCookie("access_token", { httpOnly: true, secure: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", path: "/" });
+    res.clearCookie("refresh_token", { httpOnly: true, secure: true, sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", path: "/" });
     res.json({ message: "Logged out from all devices." });
   } catch (err) {
     console.error("[logout-all]", err);
     res.status(500).json({ error: "Failed to log out all devices." });
   }
 });
- 
+
 // ── POST /auth/refresh ────────────────────────────────────────
 router.post("/refresh", async (req, res) => {
   try {
     const token = req.cookies?.refresh_token;
     if (!token) return res.status(401).json({ error: "No refresh token." });
- 
+
     const record = await validateRefreshToken(token);
     if (!record) return res.status(401).json({ error: "Refresh token invalid or expired. Please log in again." });
- 
+
     const user = await UserModel.findById(record.userId);
     if (!user) return res.status(401).json({ error: "User not found." });
- 
+
     // Rotate refresh token (one-time use)
     await revokeRefreshToken(token);
     const safeUser = UserModel.sanitize(user);
     await issueTokens(res, safeUser);
- 
+
     res.json({ user: safeUser });
   } catch (err) {
     console.error("[refresh]", err);
     res.status(500).json({ error: "Token refresh failed." });
   }
 });
- 
+
 // ── GET /auth/me ──────────────────────────────────────────────
 router.get("/me", requireAuth, async (req, res) => {
   try {
@@ -162,17 +163,17 @@ router.get("/me", requireAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to fetch user." });
   }
 });
- 
+
 // ── GET /auth/google ──────────────────────────────────────────
 const googleConfigured = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
- 
+
 router.get("/google", (req, res, next) => {
   if (!googleConfigured) {
     return res.status(503).json({ error: "Google OAuth is not configured on this server." });
   }
   passport.authenticate("google", { scope: ["profile", "email"], session: false })(req, res, next);
 });
- 
+
 // ── GET /auth/google/callback ─────────────────────────────────
 router.get("/google/callback", (req, res, next) => {
   if (!googleConfigured) {
@@ -192,6 +193,5 @@ router.get("/google/callback", (req, res, next) => {
     }
   });
 });
- 
+
 export default router;
- 
