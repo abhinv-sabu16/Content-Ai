@@ -17,7 +17,7 @@ const UserSchema = new mongoose.Schema({
   lastLoginAt:       { type: Date, default: Date.now },
 }, { timestamps: true });
 
-const User = mongoose.models.User || mongoose.model("User", UserSchema);
+export const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 export const UserModel = {
   async findByEmail(email) {
