@@ -22,8 +22,6 @@ export async function requireAdmin(req, res, next) {
     if (!token) return res.status(401).json({ error: "Not authenticated." });
     const payload = verifyAccessToken(token);
     req.user = payload;
-
-    // Verify admin flag from DB (not just token)
     const user = await UserModel.findById(payload.sub);
     if (!user || !user.isAdmin) {
       return res.status(403).json({ error: "Admin access required." });

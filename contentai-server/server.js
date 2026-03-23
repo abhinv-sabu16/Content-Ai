@@ -6,6 +6,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 
+import { connectDB } from "./src/config/db.js";
 import { configurePassport } from "./src/config/passport.js";
 import authRoutes from "./src/routes/auth.js";
 import userRoutes from "./src/routes/users.js";
@@ -14,10 +15,14 @@ import projectRoutes from "./src/routes/projects.js";
 import adminRoutes from "./src/routes/admin.js";
 import { logError } from "./src/utils/errorLogger.js";
 
+// Connect to MongoDB first
+await connectDB();
+
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+
 app.use(cors({
   origin: (origin, callback) => {
     const allowed = [
@@ -25,16 +30,15 @@ app.use(cors({
       "http://localhost:5173",
       "http://localhost:3000",
     ].filter(Boolean);
-    // Allow requests with no origin (mobile apps, curl, etc.)
     if (!origin || allowed.includes(origin)) return callback(null, true);
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
-  credentials: true, // Required for cross-origin cookies
+  credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  exposedHeaders: ["Set-Cookie"],
 }));
-app.use(express.json({ limit: "20mb" })); // Increased for base64 avatars
+
+app.use(express.json({ limit: "20mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
@@ -43,7 +47,6 @@ if (process.env.NODE_ENV !== "test") app.use(morgan("dev"));
 configurePassport();
 app.use(passport.initialize());
 
-// ── Routes ───────────────────────────────────────────────────
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 app.use("/generate", generateRoutes);
@@ -54,45 +57,26 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// ── 404 handler ───────────────────────────────────────────────
 app.use((req, res) => {
-  // Log 404s but show generic message to users
   logError({
-    route: req.path,
-    method: req.method,
-    status: 404,
+    route: req.path, method: req.method, status: 404,
     message: `Route not found: ${req.method} ${req.path}`,
-    userId: req.user?.sub || null,
-    ip: req.ip,
+    userId: req.user?.sub || null, ip: req.ip,
     userAgent: req.headers["user-agent"],
   });
   res.status(404).json({ error: "The requested resource was not found." });
 });
 
-// ── Global error handler — logs ALL errors, shows generic msg to users ──
 app.use((err, req, res, next) => {
   const status = err.status || 500;
-
-  // Always log the real error details
   logError({
-    route: req.path,
-    method: req.method,
-    status,
-    message: err.message,
-    stack: err.stack,
-    userId: req.user?.sub || null,
-    ip: req.ip,
+    route: req.path, method: req.method, status,
+    message: err.message, stack: err.stack,
+    userId: req.user?.sub || null, ip: req.ip,
     userAgent: req.headers["user-agent"],
   });
-
   console.error("[error]", err.stack);
-
-  // Users only see a generic message — real details go to admin dashboard
-  res.status(status).json({
-    error: status === 404
-      ? "The requested resource was not found."
-      : "Something went wrong. Please try again.",
-  });
+  res.status(status).json({ error: "Something went wrong. Please try again." });
 });
 
 app.listen(PORT, () => {

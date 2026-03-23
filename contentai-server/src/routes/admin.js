@@ -2,54 +2,55 @@ import { Router } from "express";
 import { requireAdmin } from "../middleware/auth.js";
 import { UserModel } from "../models/user.js";
 import { ProjectModel } from "../models/project.js";
+import { User, Project } from "../models/mongo.js";
 import { getLogs, resolveError, clearResolvedLogs, getErrorStats } from "../utils/errorLogger.js";
 import { revokeAllUserTokens } from "../utils/tokens.js";
-import db from "../config/db.js";
 
 const router = Router();
-
-// All admin routes require admin auth
 router.use(requireAdmin);
 
 // ── GET /admin/stats ──────────────────────────────────────────
 router.get("/stats", async (req, res) => {
   try {
-    await db.read();
-    const users = db.data.users || [];
     const now = new Date();
     const last24h = new Date(now - 24 * 60 * 60 * 1000);
     const last7d = new Date(now - 7 * 24 * 60 * 60 * 1000);
 
-    const newUsersToday = users.filter(u => new Date(u.createdAt) > last24h).length;
-    const newUsersWeek = users.filter(u => new Date(u.createdAt) > last7d).length;
-    const activeToday = users.filter(u => u.lastLoginAt && new Date(u.lastLoginAt) > last24h).length;
-    const totalGenerations = users.reduce((sum, u) => sum + (u.generationsUsed || 0), 0);
-    const suspended = users.filter(u => u.suspended).length;
-    const admins = users.filter(u => u.isAdmin).length;
-    const googleUsers = users.filter(u => u.googleId).length;
-    const planCounts = { free: 0, pro: 0, enterprise: 0 };
-    users.forEach(u => { planCounts[u.plan] = (planCounts[u.plan] || 0) + 1; });
+    const [
+      totalUsers, newToday, newThisWeek, activeToday,
+      suspended, admins, googleUsers,
+      freePlan, proPlan, enterprisePlan,
+    ] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ createdAt: { $gt: last24h } }),
+      User.countDocuments({ createdAt: { $gt: last7d } }),
+      User.countDocuments({ lastLoginAt: { $gt: last24h } }),
+      User.countDocuments({ suspended: true }),
+      User.countDocuments({ isAdmin: true }),
+      User.countDocuments({ googleId: { $ne: null } }),
+      User.countDocuments({ plan: "free" }),
+      User.countDocuments({ plan: "pro" }),
+      User.countDocuments({ plan: "enterprise" }),
+    ]);
 
-    const errorStats = getErrorStats();
+    const genResult = await User.aggregate([{ $group: { _id: null, total: { $sum: "$generationsUsed" } } }]);
+    const totalGenerations = genResult[0]?.total || 0;
+    const errorStats = await getErrorStats();
 
     res.json({
       users: {
-        total: users.length,
-        newToday: newUsersToday,
-        newThisWeek: newUsersWeek,
-        activeToday,
-        suspended,
-        admins,
-        googleUsers,
-        plans: planCounts,
+        total: totalUsers, newToday, newThisWeek, activeToday,
+        suspended, admins, googleUsers,
+        plans: { free: freePlan, pro: proPlan, enterprise: enterprisePlan },
       },
       generations: {
         total: totalGenerations,
-        avgPerUser: users.length ? Math.round(totalGenerations / users.length) : 0,
+        avgPerUser: totalUsers ? Math.round(totalGenerations / totalUsers) : 0,
       },
       errors: errorStats,
     });
   } catch (err) {
+    console.error("[admin/stats]", err);
     res.status(500).json({ error: "Failed to fetch stats." });
   }
 });
@@ -58,26 +59,22 @@ router.get("/stats", async (req, res) => {
 router.get("/users", async (req, res) => {
   try {
     const { search, plan, suspended, page = 1, limit = 20 } = req.query;
-    await db.read();
-    let users = (db.data.users || []).map(u => UserModel.sanitize(u));
+    const filter = {};
+    if (search) filter.$or = [
+      { name: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+    ];
+    if (plan) filter.plan = plan;
+    if (suspended !== undefined) filter.suspended = suspended === "true";
 
-    if (search) {
-      const q = search.toLowerCase();
-      users = users.filter(u =>
-        u.name?.toLowerCase().includes(q) ||
-        u.email?.toLowerCase().includes(q)
-      );
-    }
-    if (plan) users = users.filter(u => u.plan === plan);
-    if (suspended !== undefined) users = users.filter(u => u.suspended === (suspended === "true"));
+    const total = await User.countDocuments(filter);
+    const users = await User.find(filter)
+      .sort({ createdAt: -1 })
+      .skip((parseInt(page) - 1) * parseInt(limit))
+      .limit(parseInt(limit))
+      .lean();
 
-    users.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-    const total = users.length;
-    const start = (parseInt(page) - 1) * parseInt(limit);
-    const paginated = users.slice(start, start + parseInt(limit));
-
-    res.json({ users: paginated, total, page: parseInt(page), limit: parseInt(limit) });
+    res.json({ users: users.map(u => UserModel.sanitize(u)), total, page: parseInt(page), limit: parseInt(limit) });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch users." });
   }
@@ -98,17 +95,11 @@ router.get("/users/:id", async (req, res) => {
 router.patch("/users/:id", async (req, res) => {
   try {
     const { plan, generationsLimit, suspended, isAdmin } = req.body;
-
-    // Prevent self-demotion
     if (req.params.id === req.user.sub && isAdmin === false) {
       return res.status(400).json({ error: "You cannot remove your own admin access." });
     }
-
     const user = await UserModel.adminUpdate(req.params.id, { plan, generationsLimit, suspended, isAdmin });
-
-    // If suspending, revoke all sessions
     if (suspended === true) await revokeAllUserTokens(req.params.id);
-
     res.json({ user });
   } catch (err) {
     res.status(500).json({ error: err.message || "Failed to update user." });
@@ -128,9 +119,8 @@ router.post("/users/:id/reset-usage", async (req, res) => {
 // ── DELETE /admin/users/:id ───────────────────────────────────
 router.delete("/users/:id", async (req, res) => {
   try {
-    if (req.params.id === req.user.sub) {
+    if (req.params.id === req.user.sub)
       return res.status(400).json({ error: "You cannot delete your own account from admin panel." });
-    }
     await UserModel.adminDelete(req.params.id);
     res.json({ message: "User deleted successfully." });
   } catch (err) {
@@ -139,12 +129,11 @@ router.delete("/users/:id", async (req, res) => {
 });
 
 // ── GET /admin/errors ─────────────────────────────────────────
-router.get("/errors", (req, res) => {
+router.get("/errors", async (req, res) => {
   try {
     const { page = 1, limit = 50, resolved } = req.query;
-    const result = getLogs({
-      page: parseInt(page),
-      limit: parseInt(limit),
+    const result = await getLogs({
+      page: parseInt(page), limit: parseInt(limit),
       resolved: resolved === undefined ? undefined : resolved === "true",
     });
     res.json(result);
@@ -154,33 +143,28 @@ router.get("/errors", (req, res) => {
 });
 
 // ── PATCH /admin/errors/:id/resolve ───────────────────────────
-router.patch("/errors/:id/resolve", (req, res) => {
-  const success = resolveError(req.params.id);
+router.patch("/errors/:id/resolve", async (req, res) => {
+  const success = await resolveError(req.params.id);
   if (!success) return res.status(404).json({ error: "Error log not found." });
   res.json({ message: "Marked as resolved." });
 });
 
 // ── DELETE /admin/errors/resolved ─────────────────────────────
-router.delete("/errors/resolved", (req, res) => {
-  const remaining = clearResolvedLogs();
-  res.json({ message: "Cleared resolved logs.", remaining });
+router.delete("/errors/resolved", async (req, res) => {
+  const count = await clearResolvedLogs();
+  res.json({ message: "Cleared resolved logs.", count });
 });
 
 // ── GET /admin/system ─────────────────────────────────────────
 router.get("/system", async (req, res) => {
   try {
-    // Check Ollama
     let ollamaStatus = "offline";
-    let ollamaModel = process.env.OLLAMA_MODEL || "llama3.2";
     try {
-      const r = await fetch(`${process.env.OLLAMA_URL || "http://localhost:11434"}/api/tags`, {
-        signal: AbortSignal.timeout(2000),
-      });
+      const r = await fetch(`${process.env.OLLAMA_URL || "http://localhost:11434"}/api/tags`, { signal: AbortSignal.timeout(2000) });
       if (r.ok) ollamaStatus = "online";
     } catch (_) {}
 
-    await db.read();
-    const dbSize = JSON.stringify(db.data).length;
+    const dbStats = await User.db.db.stats();
 
     res.json({
       server: {
@@ -189,8 +173,12 @@ router.get("/system", async (req, res) => {
         memoryMB: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
         env: process.env.NODE_ENV || "development",
       },
-      ollama: { status: ollamaStatus, model: ollamaModel, url: process.env.OLLAMA_URL || "http://localhost:11434" },
-      database: { sizeBytes: dbSize, users: db.data.users?.length || 0, tokens: db.data.refreshTokens?.length || 0 },
+      ollama: { status: ollamaStatus, model: process.env.OLLAMA_MODEL || "llama3.2" },
+      database: {
+        type: "MongoDB Atlas",
+        sizeMB: Math.round((dbStats.dataSize || 0) / 1024 / 1024 * 100) / 100,
+        users: await User.countDocuments(),
+      },
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch system info." });
