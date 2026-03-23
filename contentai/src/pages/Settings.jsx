@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, Check, Sliders, Palette, Cpu, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { Save, Check, Sliders, Palette, Cpu, RefreshCw, Wifi, WifiOff, Zap } from "lucide-react";
 import TopBar from "../components/TopBar";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -22,37 +22,39 @@ const Field = ({ label, hint, children }) => (
   </div>
 );
 
+// Provider badge colors
+const PROVIDER_STYLES = {
+  Groq:   { bg: "rgba(99,102,241,0.08)", border: "rgba(99,102,241,0.25)", color: "#818cf8", icon: "⚡" },
+  Ollama: { bg: "rgba(63,255,162,0.06)", border: "rgba(63,255,162,0.2)",  color: "#3fffa2", icon: "🦙" },
+  none:   { bg: "rgba(239,68,68,0.06)",  border: "rgba(239,68,68,0.2)",   color: "#f87171", icon: "⚠️" },
+};
+
 export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
   const [saved, setSaved] = useState(false);
   const [settings, setSettings] = useState(() => {
     try { return JSON.parse(localStorage.getItem("contentai_settings") || "{}"); } catch { return {}; }
   });
 
-  // Ollama status
-  const [ollamaStatus, setOllamaStatus] = useState(null); // null | "checking" | "online" | "offline"
-  const [ollamaModels, setOllamaModels] = useState([]);
-  const [ollamaActive, setOllamaActive] = useState("");
+  // AI provider status
+  const [aiStatus, setAiStatus] = useState(null);
+  const [checking, setChecking] = useState(false);
 
   const set = (k, v) => setSettings(s => ({ ...s, [k]: v }));
 
-  const checkOllama = async () => {
-    setOllamaStatus("checking");
+  const checkAiStatus = async () => {
+    setChecking(true);
     try {
       const res = await fetch(`${API}/generate/status`, { credentials: "include" });
       const data = await res.json();
-      if (data.status === "online") {
-        setOllamaStatus("online");
-        setOllamaModels(data.availableModels || []);
-        setOllamaActive(data.activeModel || "");
-      } else {
-        setOllamaStatus("offline");
-      }
+      setAiStatus(data);
     } catch {
-      setOllamaStatus("offline");
+      setAiStatus({ status: "offline", provider: "none", error: "Could not reach server." });
+    } finally {
+      setChecking(false);
     }
   };
 
-  useEffect(() => { checkOllama(); }, []);
+  useEffect(() => { checkAiStatus(); }, []);
 
   const handleSave = () => {
     localStorage.setItem("contentai_settings", JSON.stringify(settings));
@@ -62,62 +64,116 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
 
   const inputClass = "w-full bg-ink-700 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white/90 placeholder-white/20 focus:border-ember-500/50 transition-colors";
 
+  const provider = aiStatus?.provider || "none";
+  const isOnline = aiStatus?.status === "online";
+  const style = PROVIDER_STYLES[provider] || PROVIDER_STYLES.none;
+
+  // Section title based on provider
+  const engineTitle = isOnline
+    ? `AI Engine — ${provider}`
+    : "AI Engine";
+
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      <TopBar onToggleSidebar={onToggleSidebar} title="Settings" subtitle="Preferences & configuration" session={session} onOpenProfile={onOpenProfile} />
+      <TopBar
+        onToggleSidebar={onToggleSidebar}
+        title="Settings"
+        subtitle="Preferences & configuration"
+        session={session}
+        onOpenProfile={onOpenProfile}
+      />
 
       <div className="flex-1 overflow-auto p-6">
         <div className="max-w-2xl mx-auto flex flex-col gap-5">
 
-          {/* ── Ollama Status ── */}
-          <Section icon={Cpu} title="AI Engine — Ollama">
-            {/* Status indicator */}
-            <div className="flex items-center justify-between p-4 rounded-xl"
-              style={{
-                background: ollamaStatus === "online" ? "rgba(63,255,162,0.06)" : ollamaStatus === "offline" ? "rgba(239,68,68,0.06)" : "rgba(255,255,255,0.03)",
-                border: `1px solid ${ollamaStatus === "online" ? "rgba(63,255,162,0.2)" : ollamaStatus === "offline" ? "rgba(239,68,68,0.2)" : "rgba(255,255,255,0.06)"}`,
-              }}>
+          {/* ── AI Engine Status ── */}
+          <Section icon={Cpu} title={engineTitle}>
+
+            {/* Status card */}
+            <div className="flex items-center justify-between p-4 rounded-xl transition-all"
+              style={{ background: style.bg, border: `1px solid ${style.border}` }}>
               <div className="flex items-center gap-3">
-                {ollamaStatus === "online"
-                  ? <Wifi size={16} className="text-jade-400" />
-                  : ollamaStatus === "offline"
-                  ? <WifiOff size={16} className="text-red-400" />
-                  : <RefreshCw size={16} className="text-white/30 animate-spin" />
-                }
+                {checking ? (
+                  <RefreshCw size={16} className="text-white/30 animate-spin" />
+                ) : isOnline ? (
+                  <Wifi size={16} style={{ color: style.color }} />
+                ) : (
+                  <WifiOff size={16} className="text-red-400" />
+                )}
                 <div>
-                  <p className={`text-sm font-semibold ${ollamaStatus === "online" ? "text-jade-400" : ollamaStatus === "offline" ? "text-red-400" : "text-white/40"}`}>
-                    {ollamaStatus === "online" ? "Ollama is running" : ollamaStatus === "offline" ? "Ollama is offline" : "Checking Ollama…"}
+                  <p className="text-sm font-semibold" style={{ color: checking ? "rgba(255,255,255,0.4)" : style.color }}>
+                    {checking
+                      ? "Checking AI engine…"
+                      : isOnline
+                        ? `${style.icon} ${provider} is connected`
+                        : "No AI provider available"
+                    }
                   </p>
-                  {ollamaStatus === "online" && ollamaActive && (
-                    <p className="text-xs text-white/35 mt-0.5">Active model: <span className="font-mono text-jade-400/70">{ollamaActive}</span></p>
+                  {isOnline && aiStatus?.activeModel && (
+                    <p className="text-xs text-white/35 mt-0.5">
+                      Active model:{" "}
+                      <span className="font-mono" style={{ color: style.color + "aa" }}>
+                        {aiStatus.activeModel}
+                      </span>
+                    </p>
                   )}
-                  {ollamaStatus === "offline" && (
-                    <p className="text-xs text-white/35 mt-0.5">Run <span className="font-mono text-white/50">ollama serve</span> in your terminal</p>
+                  {!isOnline && !checking && aiStatus?.error && (
+                    <p className="text-xs text-white/35 mt-0.5">{aiStatus.error}</p>
                   )}
                 </div>
               </div>
-              <button onClick={checkOllama}
-                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5 border border-white/8 transition-all">
-                <RefreshCw size={12} className={ollamaStatus === "checking" ? "animate-spin" : ""} />
+              <button
+                onClick={checkAiStatus}
+                disabled={checking}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5 border border-white/8 transition-all disabled:opacity-50">
+                <RefreshCw size={12} className={checking ? "animate-spin" : ""} />
                 Refresh
               </button>
             </div>
 
-            {/* Available models */}
-            {ollamaStatus === "online" && ollamaModels.length > 0 && (
-              <Field label="Available Models" hint="These are the models installed on your machine via Ollama.">
+            {/* Groq — available models */}
+            {isOnline && provider === "Groq" && aiStatus?.availableModels?.length > 0 && (
+              <Field label="Available Models" hint="These models are available via your Groq API key.">
                 <div className="flex flex-col gap-2">
-                  {ollamaModels.map(m => (
-                    <div key={m} className="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all"
+                  {aiStatus.availableModels.map(m => (
+                    <div key={m}
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all"
                       style={{
-                        background: ollamaActive === m ? "rgba(63,255,162,0.08)" : "rgba(255,255,255,0.03)",
-                        border: `1px solid ${ollamaActive === m ? "rgba(63,255,162,0.25)" : "rgba(255,255,255,0.06)"}`,
+                        background: aiStatus.activeModel === m ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${aiStatus.activeModel === m ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.06)"}`,
                       }}>
                       <div className="flex items-center gap-2.5">
-                        <span className="text-base">🤖</span>
+                        <span className="text-base">⚡</span>
                         <span className="text-sm font-mono text-white/75">{m}</span>
                       </div>
-                      {ollamaActive === m && (
+                      {aiStatus.activeModel === m && (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                          style={{ background: "rgba(99,102,241,0.15)", color: "#818cf8" }}>
+                          Active
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </Field>
+            )}
+
+            {/* Ollama — available models */}
+            {isOnline && provider === "Ollama" && aiStatus?.availableModels?.length > 0 && (
+              <Field label="Installed Models" hint="These models are installed locally via Ollama.">
+                <div className="flex flex-col gap-2">
+                  {aiStatus.availableModels.map(m => (
+                    <div key={m}
+                      className="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all"
+                      style={{
+                        background: aiStatus.activeModel === m ? "rgba(63,255,162,0.08)" : "rgba(255,255,255,0.03)",
+                        border: `1px solid ${aiStatus.activeModel === m ? "rgba(63,255,162,0.25)" : "rgba(255,255,255,0.06)"}`,
+                      }}>
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-base">🦙</span>
+                        <span className="text-sm font-mono text-white/75">{m}</span>
+                      </div>
+                      {aiStatus.activeModel === m && (
                         <span className="text-xs text-jade-400 font-semibold px-2 py-0.5 rounded-full"
                           style={{ background: "rgba(63,255,162,0.1)" }}>Active</span>
                       )}
@@ -127,39 +183,48 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
               </Field>
             )}
 
-            {/* Offline instructions */}
-            {ollamaStatus === "offline" && (
+            {/* Offline — setup instructions */}
+            {!isOnline && !checking && (
               <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(255,107,53,0.15)" }}>
                 <div className="px-4 py-3" style={{ background: "rgba(255,107,53,0.05)" }}>
-                  <p className="text-xs font-bold text-ember-400 uppercase tracking-widest">Quick Setup</p>
+                  <p className="text-xs font-bold text-ember-400 uppercase tracking-widest">Setup Options</p>
                 </div>
-                <div className="p-4 space-y-3">
-                  {[
-                    { step: "1", cmd: null, label: "Download Ollama from ollama.com and install it" },
-                    { step: "2", cmd: "ollama serve", label: "Start Ollama server" },
-                    { step: "3", cmd: "ollama pull llama3.2", label: "Download a model (4GB, one-time)" },
-                  ].map(({ step, cmd, label }) => (
-                    <div key={step} className="flex items-start gap-3">
-                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5"
-                        style={{ background: "rgba(255,107,53,0.3)" }}>{step}</span>
-                      <div>
-                        <p className="text-xs text-white/50">{label}</p>
-                        {cmd && (
-                          <code className="text-xs font-mono text-ember-300 bg-white/5 px-2 py-0.5 rounded mt-1 inline-block">{cmd}</code>
-                        )}
-                      </div>
+                <div className="p-4 space-y-4">
+                  {/* Groq option */}
+                  <div className="p-3 rounded-xl" style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Zap size={13} className="text-indigo-400" />
+                      <p className="text-xs font-semibold text-indigo-400">Option 1 — Groq (Free, Cloud)</p>
                     </div>
-                  ))}
+                    <p className="text-xs text-white/40 mb-2">Get a free API key at console.groq.com then add to your server:</p>
+                    <code className="text-xs font-mono text-indigo-300 bg-white/5 px-2 py-1 rounded block">
+                      GROQ_API_KEY=gsk_your_key_here
+                    </code>
+                  </div>
+                  {/* Ollama option */}
+                  <div className="p-3 rounded-xl" style={{ background: "rgba(63,255,162,0.04)", border: "1px solid rgba(63,255,162,0.1)" }}>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm">🦙</span>
+                      <p className="text-xs font-semibold text-jade-400">Option 2 — Ollama (Local)</p>
+                    </div>
+                    <div className="space-y-1.5">
+                      {[
+                        { n: "1", text: "Download from ollama.com and install" },
+                        { n: "2", cmd: "ollama serve", text: "Start server" },
+                        { n: "3", cmd: "ollama pull llama3.2", text: "Download model (4GB)" },
+                      ].map(({ n, cmd, text }) => (
+                        <div key={n} className="flex items-start gap-2">
+                          <span className="w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5"
+                            style={{ background: "rgba(63,255,162,0.2)", fontSize: "9px" }}>{n}</span>
+                          <div>
+                            <p className="text-xs text-white/40">{text}</p>
+                            {cmd && <code className="text-xs font-mono text-jade-300 bg-white/5 px-1.5 py-0.5 rounded mt-0.5 inline-block">{cmd}</code>}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* No models installed */}
-            {ollamaStatus === "online" && ollamaModels.length === 0 && (
-              <div className="p-4 rounded-xl" style={{ background: "rgba(255,107,53,0.07)", border: "1px solid rgba(255,107,53,0.15)" }}>
-                <p className="text-xs text-ember-400 font-semibold mb-1">No models installed</p>
-                <p className="text-xs text-white/40 mb-2">Run this in your terminal to download a model:</p>
-                <code className="text-xs font-mono text-ember-300 bg-white/5 px-3 py-1.5 rounded block">ollama pull llama3.2</code>
               </div>
             )}
           </Section>
@@ -195,7 +260,8 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
                     className={`py-2 rounded-xl border text-xs font-medium transition-all ${
                       settings.theme === theme || (!settings.theme && theme === "Dark")
                         ? "border-ember-500/50 bg-ember-500/10 text-ember-300"
-                        : "border-white/5 bg-ink-700 text-white/40 hover:border-white/15"}`}>
+                        : "border-white/5 bg-ink-700 text-white/40 hover:border-white/15"
+                    }`}>
                     {theme}
                   </button>
                 ))}
@@ -217,7 +283,6 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
             style={{ background: saved ? "rgba(63,255,162,0.15)" : "linear-gradient(135deg, #ff6b35, #f54e1e)", color: saved ? "#3fffa2" : "white" }}>
             {saved ? <><Check size={15} /> Saved!</> : <><Save size={15} /> Save Settings</>}
           </button>
-
         </div>
       </div>
     </div>
