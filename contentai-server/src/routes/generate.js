@@ -1,33 +1,46 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
 import { UserModel } from "../models/user.js";
-import { searchProject } from "../utils/vectorStore.js";
-import { ProjectModel } from "../models/project.js";
 
 const router = Router();
 
-const OLLAMA_URL = process.env.OLLAMA_URL || "http://localhost:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "llama3.2";
-
 // ── GET /generate/status ──────────────────────────────────────
 router.get("/status", async (req, res) => {
-  try {
-    const response = await fetch(`${OLLAMA_URL}/api/tags`, {
-      signal: AbortSignal.timeout(3000),
+  if (process.env.GROQ_API_KEY) {
+    return res.json({
+      status: "online",
+      provider: "Groq",
+      activeModel: process.env.GROQ_MODEL || "llama3-8b-8192",
+      availableModels: ["llama3-8b-8192", "llama3-70b-8192", "mixtral-8x7b-32768", "gemma2-9b-it"],
     });
-    if (!response.ok) throw new Error("Ollama not responding");
+  }
+
+  // Fallback: check Ollama
+  try {
+    const response = await fetch(
+      `${process.env.OLLAMA_URL || "http://localhost:11434"}/api/tags`,
+      { signal: AbortSignal.timeout(3000) }
+    );
+    if (!response.ok) throw new Error();
     const data = await response.json();
-    const models = data.models?.map(m => m.name) || [];
-    res.json({ status: "online", url: OLLAMA_URL, activeModel: OLLAMA_MODEL, availableModels: models });
+    return res.json({
+      status: "online",
+      provider: "Ollama",
+      activeModel: process.env.OLLAMA_MODEL || "llama3.2",
+      availableModels: data.models?.map(m => m.name) || [],
+    });
   } catch {
-    res.status(503).json({ status: "offline", error: "Ollama is not running. Start it with: ollama serve" });
+    return res.status(503).json({
+      status: "offline",
+      provider: "none",
+      error: "No AI provider configured. Add GROQ_API_KEY to environment variables.",
+    });
   }
 });
 
 // ── POST /generate ────────────────────────────────────────────
 router.post("/", requireAuth, async (req, res) => {
-  const { systemPrompt, userMessage, model, projectId } = req.body;
-  const ollamaModel = model || OLLAMA_MODEL;
+  const { systemPrompt, userMessage } = req.body;
 
   if (!systemPrompt || !userMessage) {
     return res.status(422).json({ error: "systemPrompt and userMessage are required." });
@@ -41,58 +54,105 @@ router.post("/", requireAuth, async (req, res) => {
     }
   } catch (_) {}
 
-  // Check Ollama is reachable
-  try {
-    await fetch(`${OLLAMA_URL}/api/tags`, { signal: AbortSignal.timeout(2000) });
-  } catch {
-    return res.status(503).json({ error: "Ollama is not running. Please start it with: ollama serve" });
+  // ── Try Groq first, fallback to Ollama ────────────────────
+  if (process.env.GROQ_API_KEY) {
+    return generateWithGroq(req, res, systemPrompt, userMessage);
   }
 
+  const ollamaUrl = process.env.OLLAMA_URL || "http://localhost:11434";
   try {
-    // ── RAG: retrieve relevant context if projectId provided ──
-    let ragContext = "";
-    if (projectId) {
-      try {
-        // Verify project belongs to user
-        const project = await ProjectModel.getById(projectId, req.user.sub);
-        if (project) {
-          const results = await searchProject(projectId, userMessage, 5);
-          if (results.length > 0) {
-            ragContext = results.map((r, i) =>
-              `[Source ${i + 1}: ${r.sourceName}]\n${r.text}`
-            ).join("\n\n---\n\n");
+    await fetch(`${ollamaUrl}/api/tags`, { signal: AbortSignal.timeout(2000) });
+    return generateWithOllama(req, res, systemPrompt, userMessage, ollamaUrl);
+  } catch {
+    return res.status(503).json({
+      error: "No AI provider available. Please configure GROQ_API_KEY in your environment.",
+    });
+  }
+});
+
+// ── Groq generation ───────────────────────────────────────────
+async function generateWithGroq(req, res, systemPrompt, userMessage) {
+  const model = process.env.GROQ_MODEL || "llama3-8b-8192";
+
+  try {
+    const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage },
+        ],
+        stream: true,
+        max_tokens: 2048,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!groqRes.ok) {
+      const err = await groqRes.json().catch(() => ({}));
+      if (groqRes.status === 401) return res.status(500).json({ error: "Invalid Groq API key." });
+      if (groqRes.status === 429) return res.status(429).json({ error: "Groq rate limit reached. Try again shortly." });
+      return res.status(500).json({ error: err.error?.message || "Groq API error." });
+    }
+
+    // Stream SSE back to client
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.setHeader("X-Accel-Buffering", "no");
+
+    const reader = groqRes.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const data = line.slice(6).trim();
+        if (data === "[DONE]") { res.write("data: [DONE]\n\n"); continue; }
+        try {
+          const parsed = JSON.parse(data);
+          const text = parsed.choices?.[0]?.delta?.content || "";
+          if (text) {
+            // Convert to same format frontend expects
+            res.write(`data: ${JSON.stringify({ delta: { text } })}\n\n`);
           }
-        }
-      } catch (err) {
-        console.error("[rag-search]", err.message);
-        // Don't fail generation if RAG search fails — just continue without context
+        } catch (_) {}
       }
     }
 
-    // ── Build final prompt ────────────────────────────────────
-    let fullPrompt;
-    if (ragContext) {
-      fullPrompt = `${systemPrompt}
+    res.end();
+    await UserModel.incrementUsage(req.user.sub);
 
---- KNOWLEDGE BASE CONTEXT ---
-The following excerpts are from the user's uploaded documents. Use this context to inform your response where relevant. Prioritize accuracy over creativity when the context is clear.
+  } catch (err) {
+    console.error("[groq]", err);
+    if (!res.headersSent) res.status(500).json({ error: "Generation failed. Please try again." });
+  }
+}
 
-${ragContext}
---- END OF CONTEXT ---
+// ── Ollama generation (local fallback) ────────────────────────
+async function generateWithOllama(req, res, systemPrompt, userMessage, ollamaUrl) {
+  const model = process.env.OLLAMA_MODEL || "llama3.2";
 
-User request: ${userMessage}
-
-Response:`;
-    } else {
-      fullPrompt = `${systemPrompt}\n\nUser request: ${userMessage}\n\nResponse:`;
-    }
-
-    const ollamaRes = await fetch(`${OLLAMA_URL}/api/generate`, {
+  try {
+    const ollamaRes = await fetch(`${ollamaUrl}/api/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: ollamaModel,
-        prompt: fullPrompt,
+        model,
+        prompt: `${systemPrompt}\n\nUser request: ${userMessage}\n\nResponse:`,
         stream: true,
         options: { temperature: 0.7, top_p: 0.9, num_predict: 2048 },
       }),
@@ -100,22 +160,13 @@ Response:`;
 
     if (!ollamaRes.ok) {
       const err = await ollamaRes.json().catch(() => ({}));
-      if (ollamaRes.status === 404 || err.error?.includes("not found")) {
-        return res.status(404).json({ error: `Model "${ollamaModel}" not found. Run: ollama pull ${ollamaModel}` });
-      }
       return res.status(500).json({ error: err.error || "Ollama error." });
     }
 
-    // Stream back in same SSE format frontend expects
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
     res.setHeader("X-Accel-Buffering", "no");
-
-    // Tell frontend whether RAG context was used
-    if (ragContext) {
-      res.write(`data: ${JSON.stringify({ type: "rag_context_used", count: ragContext.split("---").length })}\n\n`);
-    }
 
     const reader = ollamaRes.body.getReader();
     const decoder = new TextDecoder();
@@ -138,9 +189,9 @@ Response:`;
     await UserModel.incrementUsage(req.user.sub);
 
   } catch (err) {
-    console.error("[generate]", err);
+    console.error("[ollama]", err);
     if (!res.headersSent) res.status(500).json({ error: "Generation failed. Please try again." });
   }
-});
+}
 
 export default router;
