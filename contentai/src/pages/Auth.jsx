@@ -12,7 +12,7 @@ const FEATURES = [
 function InputField({ icon: Icon, type, placeholder, value, onChange, showToggle, onToggle, showPassword, error }) {
   return (
     <div className="relative">
-      <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+      <Icon size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10" />
       <input
         type={showToggle ? (showPassword ? "text" : "password") : type}
         placeholder={placeholder}
@@ -28,7 +28,7 @@ function InputField({ icon: Icon, type, placeholder, value, onChange, showToggle
       />
       {showToggle && (
         <button type="button" onClick={onToggle}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors z-10">
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 transition-colors z-10">
           {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
       )}
