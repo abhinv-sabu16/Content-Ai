@@ -112,7 +112,10 @@ function AvatarSection({ name, avatar, onAvatarChange }) {
 // ── Usage stats ───────────────────────────────────────────────
 function UsageSection({ session }) {
   const [usage, setUsage] = useState(null);
-  const history = getHistory();
+  const [history, setHistory] = useState([]);
+  useEffect(() => {
+    getHistory({ limit: 10 }).then(setHistory).catch(() => {});
+  }, []);
   const recentTools = [...new Map(history.slice(0, 10).map(h => [h.toolId, h])).values()].slice(0, 3);
 
   useEffect(() => {

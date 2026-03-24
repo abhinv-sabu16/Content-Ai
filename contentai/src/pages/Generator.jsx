@@ -139,7 +139,6 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
   const [error, setError] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [ragUsed, setRagUsed] = useState(false);
-  const [showToolList, setShowToolList] = useState(false);
   const outputRef = useRef(null);
 
   // RAG
@@ -154,7 +153,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
     const toolId = searchParams.get("tool");
     if (toolId) {
       const tool = TOOLS.find(t => t.id === toolId);
-      if (tool) { setSelectedTool(tool); setFields({}); setOutput(""); setRagUsed(false); setShowToolList(false); }
+      if (tool) { setSelectedTool(tool); setFields({}); setOutput(""); setRagUsed(false); }
     }
   }, [searchParams]);
 
@@ -187,7 +186,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
       );
 
       incrementUsage();
-      saveToHistory({ toolId: selectedTool.id, toolName: selectedTool.name, fields, output: result });
+      await saveToHistory({ toolId: selectedTool.id, toolName: selectedTool.name, fields, output: result });
     } catch (err) {
       setError(err.message || "Generation failed. Please try again.");
     } finally {
@@ -223,24 +222,12 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
         onOpenProfile={onOpenProfile}
       />
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 overflow-hidden">
 
-        {/* ── Left: Tool list — Drawer on mobile, sidebar on desktop ── */}
-        <div className={`
-          absolute inset-y-0 left-0 z-20 w-72 border-r border-white/5 flex flex-col bg-ink-900 transition-all duration-300 lg:relative lg:translate-x-0
-          ${showToolList ? "translate-x-0" : "-translate-x-full"}
-          lg:flex flex-shrink-0
-        `}>
-          {/* Mobile Tool List Header */}
-          <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5">
-            <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Select Tool</span>
-            <button onClick={() => setShowToolList(false)} className="text-white/30 hover:text-white/60">
-              <X size={16} />
-            </button>
-          </div>
-
+        {/* ── Left: Tool list ── */}
+        <div className="w-72 flex-shrink-0 border-r border-white/5 flex flex-col bg-ink-900 overflow-hidden">
           <div className="p-4 border-b border-white/5">
-            <p className="hidden lg:block text-xs text-white/40 uppercase tracking-widest font-semibold mb-3">Tools</p>
+            <p className="text-xs text-white/40 uppercase tracking-widest font-semibold mb-3">Tools</p>
             <div className="flex flex-wrap gap-1.5">
               {["All", ...CATEGORIES].map(cat => (
                 <button key={cat} onClick={() => setActiveCategory(cat)}
@@ -282,11 +269,6 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
           </div>
         </div>
 
-        {/* Mobile Tool Drawer Backdrop */}
-        {showToolList && (
-          <div className="fixed inset-0 z-10 bg-black/60 backdrop-blur-sm lg:hidden" onClick={() => setShowToolList(false)} />
-        )}
-
         {/* ── Main panel ── */}
         <div className="flex flex-1 overflow-hidden">
           {!selectedTool ? (
@@ -296,13 +278,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                 <Wand2 size={28} className="text-ember-400" />
               </div>
               <h3 className="font-display font-bold text-white text-xl mb-2">Pick a Tool</h3>
-              <p className="text-white/40 text-sm max-w-xs mb-6">Select from 8 AI-powered content tools to get started.</p>
-              <button 
-                onClick={() => setShowToolList(true)}
-                className="lg:hidden flex items-center gap-2 px-6 py-2.5 rounded-xl bg-ember-500/10 text-ember-400 border border-ember-500/20 font-semibold text-sm transition-all active:scale-95"
-              >
-                Browse Tools
-              </button>
+              <p className="text-white/40 text-sm max-w-xs">Select from 8 AI-powered content tools on the left to get started.</p>
             </div>
           ) : (
             <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
@@ -311,20 +287,12 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
               <div className="lg:w-96 flex-shrink-0 flex flex-col border-r border-white/5 overflow-auto">
                 <div className="p-5 flex-1">
                   {/* Tool header */}
-                  <div className="flex items-center justify-between gap-3 mb-5">
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{selectedTool.icon}</span>
-                      <div>
-                        <h2 className="font-display font-bold text-white leading-tight">{selectedTool.name}</h2>
-                        <p className="text-xs text-white/40">{selectedTool.description}</p>
-                      </div>
+                  <div className="flex items-center gap-3 mb-5">
+                    <span className="text-2xl">{selectedTool.icon}</span>
+                    <div>
+                      <h2 className="font-display font-bold text-white">{selectedTool.name}</h2>
+                      <p className="text-xs text-white/40">{selectedTool.description}</p>
                     </div>
-                    <button 
-                      onClick={() => setShowToolList(true)}
-                      className="lg:hidden p-2 rounded-lg bg-white/5 text-xs text-white/40 hover:text-white/70"
-                    >
-                      Change
-                    </button>
                   </div>
 
                   {/* Tool fields */}

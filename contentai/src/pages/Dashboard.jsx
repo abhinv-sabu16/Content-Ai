@@ -28,7 +28,7 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    setHistory(getHistory().slice(0, 5));
+    getHistory({ limit: 5 }).then(entries => setHistory(entries)).catch(() => {});
     setUsage(getUsage());
   }, []);
 
@@ -72,7 +72,7 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
         {/* Stats */}
         <div>
           <h3 className="font-display font-semibold text-white/60 text-xs uppercase tracking-widest mb-4">Your Stats</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon={Zap} label="Total Generated" value={usage.total} color="#ff6b35" />
             <StatCard icon={TrendingUp} label="Generated Today" value={usage.today} color="#34d399" sub="↑ Active today" />
             <StatCard icon={FileText} label="Saved Items" value={history.length} color="#38bdf8" />

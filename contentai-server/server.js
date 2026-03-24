@@ -13,6 +13,7 @@ import userRoutes from "./src/routes/users.js";
 import generateRoutes from "./src/routes/generate.js";
 import projectRoutes from "./src/routes/projects.js";
 import adminRoutes from "./src/routes/admin.js";
+import historyRoutes from "./src/routes/history.js";
 import { logError } from "./src/utils/errorLogger.js";
 
 // Connect to MongoDB first
@@ -34,8 +35,6 @@ app.use(cors({
       process.env.CLIENT_URL,
       "http://localhost:5173",
       "http://localhost:3000",
-      "https://content-jn2fss81t-abhinav-sabus-projects.vercel.app",
-      
     ].filter(Boolean);
 
     // Exact match
@@ -65,6 +64,7 @@ app.use("/users", userRoutes);
 app.use("/generate", generateRoutes);
 app.use("/projects", projectRoutes);
 app.use("/admin", adminRoutes);
+app.use("/history", historyRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });

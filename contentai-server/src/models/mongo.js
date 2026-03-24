@@ -214,3 +214,18 @@ const ErrorLogSchema = new mongoose.Schema({
 
 export const ErrorLog = mongoose.models.ErrorLog ||
   mongoose.model("ErrorLog", ErrorLogSchema);
+
+// ── History Schema ────────────────────────────────────────────
+const HistorySchema = new mongoose.Schema({
+  userId:   { type: String, required: true, index: true },
+  toolId:   { type: String, required: true },
+  toolName: { type: String, required: true },
+  fields:   { type: mongoose.Schema.Types.Mixed, default: {} },
+  output:   { type: String, required: true },
+}, { timestamps: true });
+
+// Index for fast user queries
+HistorySchema.index({ userId: 1, createdAt: -1 });
+
+export const History = mongoose.models.History ||
+  mongoose.model("History", HistorySchema);
