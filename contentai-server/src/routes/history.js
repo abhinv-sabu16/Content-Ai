@@ -82,15 +82,18 @@ router.delete("/", requireAuth, async (req, res) => {
 });
 
 // ── GET /history/stats ────────────────────────────────────────
-// Summary stats for current user
 router.get("/stats", requireAuth, async (req, res) => {
   try {
     const userId = req.user.sub;
     const total = await History.countDocuments({ userId });
-    const now = new Date();
+
+    // Today — midnight to now in UTC
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
     const today = await History.countDocuments({
       userId,
-      createdAt: { $gt: new Date(now.setHours(0, 0, 0, 0)) },
+      createdAt: { $gte: startOfDay },
     });
 
     const byTool = await History.aggregate([
