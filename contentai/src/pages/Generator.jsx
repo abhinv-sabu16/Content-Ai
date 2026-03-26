@@ -135,6 +135,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
   const [fields, setFields] = useState({});
   const [output, setOutput] = useState("");
   const [streaming, setStreaming] = useState(false);
+  const [warming, setWarming] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
@@ -178,6 +179,10 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
+    const warmingTimer = setTimeout(() => {
+      setWarming(true);
+    }, 6000);
+
     try {
       const systemPrompt = selectedTool.systemPrompt(fields);
       const userMessage = "Generate the content now based on the provided details. Be thorough, creative, and professional.";
@@ -185,7 +190,11 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
       const result = await generateContent(
         systemPrompt,
         userMessage,
-        (text) => setOutput(text),
+        (text) => {
+          clearTimeout(warmingTimer);
+          setWarming(false);
+          setOutput(text);
+        },
         selectedProjectId || null,
         (used) => setRagUsed(used),
         controller.signal
@@ -197,10 +206,21 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
       if (err.name === "AbortError") {
         console.log("Generation cancelled by user.");
       } else {
-        setError(err.message || "Generation failed. Please try again.");
+        const msg = err.message || "";
+        if (msg.includes("fetch") || msg.includes("NetworkError") || msg.includes("Failed to fetch")) {
+          setError("Connection lost. Trying to reach the AI server...");
+        } else if (msg.includes("timeout") || msg.includes("408") || msg.includes("504")) {
+          setError("Ollama is taking a bit longer to wake up. Please wait a moment and try again.");
+        } else if (msg.includes("model not found") || msg.includes("404")) {
+          setError("The selected model isn't ready or was removed. Check Settings.");
+        } else {
+          setError(msg || "Generation failed. Please try again.");
+        }
       }
     } finally {
+      clearTimeout(warmingTimer);
       setStreaming(false);
+      setWarming(false);
       abortControllerRef.current = null;
     }
   };
@@ -388,9 +408,9 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                   <div className="flex items-center gap-3">
                     {/* Status dot */}
                     <div className="flex items-center gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full ${streaming ? "bg-ember-400 animate-pulse" : output ? "bg-jade-400" : "bg-white/15"}`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${streaming ? (warming ? "bg-ember-500 animate-bounce" : "bg-ember-400 animate-pulse") : output ? "bg-jade-400" : "bg-white/15"}`} />
                       <span className="text-xs font-medium text-white/40">
-                        {streaming ? "Generating…" : output ? "Output" : "Output"}
+                        {streaming ? (warming ? "Warming up model…" : "Generating…") : output ? "Output" : "Output"}
                       </span>
                     </div>
 
