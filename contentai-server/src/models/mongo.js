@@ -14,6 +14,7 @@ const UserSchema = new mongoose.Schema({
   suspended:         { type: Boolean, default: false },
   generationsUsed:   { type: Number, default: 0 },
   generationsLimit:  { type: Number, default: 100 },
+  lastUsageResetAt:  { type: Date, default: Date.now },
   lastLoginAt:       { type: Date, default: Date.now },
 }, { timestamps: true });
 
@@ -21,11 +22,26 @@ export const User = mongoose.models.User || mongoose.model("User", UserSchema);
 
 export const UserModel = {
   async findByEmail(email) {
-    return User.findOne({ email: email.toLowerCase() }).select("+password").lean();
+    const user = await User.findOne({ email: email.toLowerCase() }).select("+password").lean();
+    return this.checkMonthlyReset(user);
   },
 
   async findById(id) {
-    return User.findById(id).lean();
+    const user = await User.findById(id).lean();
+    return this.checkMonthlyReset(user);
+  },
+
+  async checkMonthlyReset(user) {
+    if (!user) return null;
+    const now = new Date();
+    const lastReset = new Date(user.lastUsageResetAt || user.createdAt);
+    const isNewMonth = now.getMonth() !== lastReset.getMonth() || now.getFullYear() !== lastReset.getFullYear();
+    if (isNewMonth) {
+      await User.findByIdAndUpdate(user._id, { generationsUsed: 0, lastUsageResetAt: now });
+      user.generationsUsed = 0;
+      user.lastUsageResetAt = now;
+    }
+    return user;
   },
 
   async getAll() {

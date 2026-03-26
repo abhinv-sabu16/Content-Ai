@@ -71,11 +71,18 @@ export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout,
           <>
             <div className="rounded-xl p-3 mb-3"
               style={{ background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.12)" }}>
-              <p className="text-xs text-ember-400 font-semibold mb-1">Free Plan</p>
-              <div className="w-full h-1 rounded-full bg-white/10 mb-1.5">
-                <div className="h-full w-1/3 rounded-full bg-gradient-to-r from-ember-500 to-ember-400" />
+              <p className="text-xs text-ember-400 font-semibold mb-1">
+                {session?.plan ? session.plan.charAt(0).toUpperCase() + session.plan.slice(1) : "Free"} Plan
+              </p>
+              <div className="w-full h-1 rounded-full bg-white/10 mb-1.5 overflow-hidden">
+                <div 
+                  className="h-full rounded-full bg-gradient-to-r from-ember-500 to-ember-400 transition-all duration-500" 
+                  style={{ width: `${Math.min(100, Math.round(((session?.generationsUsed || 0) / (session?.generationsLimit || 100)) * 100))}%` }} 
+                />
               </div>
-              <p className="text-xs text-white/30">33/100 generations</p>
+              <p className="text-xs text-white/30">
+                {session?.generationsUsed || 0}/{session?.generationsLimit || 100} generations
+              </p>
             </div>
             <div className="flex items-center gap-2.5 px-1">
               <button onClick={onOpenProfile} className="flex-shrink-0 group" title="View profile">

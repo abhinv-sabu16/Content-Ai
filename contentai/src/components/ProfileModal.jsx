@@ -132,7 +132,9 @@ function UsageSection({ session }) {
       <div className="flex items-center justify-between p-4 rounded-xl"
         style={{ background: "rgba(255,107,53,0.07)", border: "1px solid rgba(255,107,53,0.15)" }}>
         <div>
-          <p className="text-xs text-ember-400 font-bold uppercase tracking-widest mb-0.5">Free Plan</p>
+          <p className="text-xs text-ember-400 font-bold uppercase tracking-widest mb-0.5">
+            {usage?.plan ? usage.plan.charAt(0).toUpperCase() + usage.plan.slice(1) : "Free"} Plan
+          </p>
           <p className="text-xs text-white/40">Upgrade for unlimited generations</p>
         </div>
         <button className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white transition-all hover:opacity-90"
