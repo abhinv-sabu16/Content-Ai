@@ -322,10 +322,10 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
               <p className="text-white/40 text-sm max-w-xs">Select from 8 AI-powered content tools on the left to get started.</p>
             </div>
           ) : (
-            <div className="flex flex-1 overflow-hidden flex-col lg:flex-row">
+            <div className="flex flex-1 min-h-0 overflow-hidden flex-col lg:flex-row">
 
               {/* ── Input panel ── */}
-              <div className="lg:w-96 flex-shrink-0 flex flex-col border-r border-white/5 overflow-auto">
+              <div className="lg:w-96 w-full flex-shrink-0 flex flex-col border-r border-white/5 overflow-y-auto max-h-[50vh] lg:max-h-none lg:h-full">
                 <div className="p-5 flex-1">
                   {/* Tool header */}
                   <div className="flex items-center gap-3 mb-5">
