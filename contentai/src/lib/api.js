@@ -9,7 +9,7 @@ export async function generateContent(systemPrompt, userMessage, onChunk, projec
     body: JSON.stringify({
       systemPrompt,
       userMessage,
-      model: "llama-3.1-8b-instant",
+      model: JSON.parse(localStorage.getItem("contentai_settings") || "{}").activeModel || "llama-3.1-8b-instant",
       maxTokens: 2048,
       ...(projectId ? { projectId } : {}),
     }),

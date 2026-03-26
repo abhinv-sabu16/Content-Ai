@@ -141,10 +141,11 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
                 }>
                 <div className="flex flex-col gap-2">
                   {aiStatus.availableModels.map(m => {
-                    const isActive = aiStatus.activeModel === m;
+                    const isActive = (settings.activeModel || aiStatus.activeModel) === m;
                     return (
-                      <div key={m}
-                        className="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all"
+                      <button key={m}
+                        onClick={() => set("activeModel", m)}
+                        className="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all hover:bg-white/5 active:scale-[0.98] w-full text-left"
                         style={{
                           background: isActive ? modelStyle.activeBg : "rgba(255,255,255,0.03)",
                           border: `1px solid ${isActive ? modelStyle.activeBorder : "rgba(255,255,255,0.06)"}`,
@@ -159,7 +160,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
                             Active
                           </span>
                         )}
-                      </div>
+                      </button>
                     );
                   })}
                 </div>

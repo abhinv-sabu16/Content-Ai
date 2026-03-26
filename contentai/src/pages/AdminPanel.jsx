@@ -135,7 +135,7 @@ function OverviewTab({ stats, system, loading }) {
             <StatCard icon={Clock} label="Uptime" value={`${Math.floor((system.server?.uptime || 0) / 60)}m`} color="#3fffa2" />
             <StatCard icon={Zap} label="Groq" value="Online"
               color="#818cf8"
-              sub="Llama 3.1 (8B)" />
+              sub={JSON.parse(localStorage.getItem("contentai_settings") || "{}").activeModel || "Llama 3.1 (8B)"} />
           </div>
         </div>
       )}
