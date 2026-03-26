@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Wand2, Copy, Check, Download, RefreshCw, ChevronDown,
-  Sparkles, AlertCircle, BookOpen, X, ChevronUp, Database
+  AlertCircle, BookOpen, X, ChevronUp, Database
 } from "lucide-react";
 import TopBar from "../components/TopBar";
 import { TOOLS, CATEGORIES } from "../lib/tools";
@@ -350,61 +350,119 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                     {streaming ? (
                       <><RefreshCw size={15} className="animate-spin" /> Generating...</>
                     ) : (
-                      <><Sparkles size={15} /> {selectedProjectId ? "Generate with RAG" : "Generate Content"}</>
+                      <>{selectedProjectId ? "Generate with RAG" : "Generate Content"}</>
                     )}
                   </button>
                 </div>
               </div>
 
               {/* ── Output panel ── */}
-              <div className="flex-1 flex flex-col min-h-0">
-                <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-jade-400 animate-pulse-slow" />
-                    <span className="text-xs text-white/40 font-medium">
-                      {streaming ? "Generating..." : output ? "Output Ready" : "Output"}
-                    </span>
+              <div className="flex-1 flex flex-col min-h-0 bg-ink-950">
+
+                {/* Output toolbar */}
+                <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-ink-900">
+                  <div className="flex items-center gap-3">
+                    {/* Status dot */}
+                    <div className="flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${streaming ? "bg-ember-400 animate-pulse" : output ? "bg-jade-400" : "bg-white/15"}`} />
+                      <span className="text-xs font-medium text-white/40">
+                        {streaming ? "Generating…" : output ? "Output" : "Output"}
+                      </span>
+                    </div>
+
+                    {/* Meta info */}
                     {output && !streaming && (
-                      <span className="text-xs text-white/20">{output.length} chars</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/10">|</span>
+                        <span className="text-xs text-white/25">
+                          {output.split(/\s+/).filter(Boolean).length} words
+                        </span>
+                        <span className="text-white/10">|</span>
+                        <span className="text-xs text-white/25">
+                          {output.length} chars
+                        </span>
+                      </div>
                     )}
+
+                    {/* RAG badge */}
                     {ragUsed && !streaming && (
-                      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full"
-                        style={{ background: "rgba(255,107,53,0.12)", color: "#ff6b35" }}>
+                      <span className="flex items-center gap-1 text-xs px-2 py-0.5 rounded"
+                        style={{ background: "rgba(255,107,53,0.1)", color: "#ff6b35", border: "1px solid rgba(255,107,53,0.2)" }}>
                         <Database size={10} /> RAG
                       </span>
                     )}
                   </div>
+
+                  {/* Action buttons */}
                   {output && !streaming && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <button onClick={handleDownload}
-                        className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/80 px-2.5 py-1.5 rounded-lg hover:bg-white/5 transition-all">
-                        <Download size={13} /> Save
+                        className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/70 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all font-medium">
+                        <Download size={12} />
+                        Export
                       </button>
+                      <div className="w-px h-4 bg-white/10" />
                       <button onClick={handleCopy}
-                        className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-all"
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-all"
                         style={copied
-                          ? { background: "rgba(63,255,162,0.12)", color: "#3fffa2" }
-                          : { background: "rgba(255,107,53,0.12)", color: "#ff6b35" }}>
-                        {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy</>}
+                          ? { background: "rgba(63,255,162,0.1)", color: "#3fffa2", border: "1px solid rgba(63,255,162,0.2)" }
+                          : { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.6)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                        {copied ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy</>}
                       </button>
                     </div>
                   )}
                 </div>
-                <div ref={outputRef} className="flex-1 overflow-auto p-5">
+
+                {/* Output body */}
+                <div ref={outputRef} className="flex-1 overflow-auto">
+
+                  {/* Empty state */}
                   {!output && !streaming && (
-                    <div className="h-full flex flex-col items-center justify-center text-center text-white/20 gap-3">
-                      <Sparkles size={32} className="opacity-30" />
-                      <p className="text-sm">Fill in the fields and click Generate</p>
-                      {selectedProjectId && (
-                        <p className="text-xs text-ember-400/50">
-                          Knowledge base context will be used automatically
-                        </p>
-                      )}
+                    <div className="h-full flex flex-col items-center justify-center text-center px-8">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        <RefreshCw size={18} className="text-white/20" />
+                      </div>
+                      <p className="text-sm font-medium text-white/30 mb-1">No output yet</p>
+                      <p className="text-xs text-white/15 max-w-xs leading-relaxed">
+                        {selectedProjectId
+                          ? "Fill in the fields above and click Generate. Your knowledge base will be used as context."
+                          : "Fill in the fields on the left and click Generate to see your content here."
+                        }
+                      </p>
                     </div>
                   )}
+
+                  {/* Streaming skeleton */}
+                  {streaming && !output && (
+                    <div className="p-6 space-y-3">
+                      {[100, 85, 92, 70].map((w, i) => (
+                        <div key={i} className="h-3 rounded animate-pulse"
+                          style={{ width: `${w}%`, background: "rgba(255,255,255,0.06)", animationDelay: `${i * 0.1}s` }} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Actual output */}
                   {output && (
-                    <div className={`font-mono text-sm text-white/80 leading-relaxed whitespace-pre-wrap ${streaming ? "output-streaming" : "animate-fade-in"}`}>
-                      {output}
+                    <div className="p-6">
+                      {/* Tool label */}
+                      <div className="flex items-center gap-2 mb-5 pb-4 border-b border-white/5">
+                        <span className="text-sm">{selectedTool?.icon}</span>
+                        <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">
+                          {selectedTool?.name}
+                        </span>
+                        <span className="text-white/10 mx-1">·</span>
+                        <span className="text-xs text-white/20">
+                          {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+
+                      {/* Content */}
+                      <div className={`text-sm text-white/80 leading-7 whitespace-pre-wrap font-body ${streaming ? "output-streaming" : "animate-fade-in"}`}
+                        style={{ fontFamily: "'DM Sans', sans-serif", lineHeight: "1.8" }}>
+                        {output}
+                      </div>
                     </div>
                   )}
                 </div>
