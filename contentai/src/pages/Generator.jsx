@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Wand2, Copy, Check, Download, RefreshCw, ChevronDown,
-  AlertCircle, BookOpen, X, ChevronUp, Database
+  AlertCircle, BookOpen, X, ChevronUp, Database, Square
 } from "lucide-react";
 import TopBar from "../components/TopBar";
 import { TOOLS, CATEGORIES } from "../lib/tools";
@@ -140,6 +140,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [ragUsed, setRagUsed] = useState(false);
   const outputRef = useRef(null);
+  const abortControllerRef = useRef(null);
 
   // RAG
   const [projects, setProjects] = useState([]);
@@ -173,6 +174,10 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
     setOutput("");
     setRagUsed(false);
 
+    // Setup abort controller
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       const systemPrompt = selectedTool.systemPrompt(fields);
       const userMessage = "Generate the content now based on the provided details. Be thorough, creative, and professional.";
@@ -183,13 +188,26 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
         (text) => setOutput(text),
         selectedProjectId || null,
         (used) => setRagUsed(used),
+        controller.signal
       );
 
       incrementUsage();
       await saveToHistory({ toolId: selectedTool.id, toolName: selectedTool.name, fields, output: result });
     } catch (err) {
-      setError(err.message || "Generation failed. Please try again.");
+      if (err.name === "AbortError") {
+        console.log("Generation cancelled by user.");
+      } else {
+        setError(err.message || "Generation failed. Please try again.");
+      }
     } finally {
+      setStreaming(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
       setStreaming(false);
     }
   };
@@ -343,12 +361,18 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                     </div>
                   )}
                   <button
-                    onClick={handleGenerate}
-                    disabled={streaming}
-                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm text-white transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                    style={{ background: streaming ? "#2d1008" : "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
+                    onClick={streaming ? handleStop : handleGenerate}
+                    className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all active:scale-[0.98] ${
+                      streaming ? "text-red-400 border border-red-500/30 bg-red-500/10" : "text-white shadow-lg shadow-ember-500/10"
+                    }`}
+                    style={!streaming ? { background: "linear-gradient(135deg, #ff6b35, #f54e1e)" } : {}}>
                     {streaming ? (
-                      <><RefreshCw size={15} className="animate-spin" /> Generating...</>
+                      <>
+                        <RefreshCw size={14} className="animate-spin" />
+                        <span className="opacity-50 mx-1">|</span>
+                        <Square size={13} fill="currentColor" />
+                        Stop Generation
+                      </>
                     ) : (
                       <>{selectedProjectId ? "Generate with RAG" : "Generate Content"}</>
                     )}
@@ -394,7 +418,13 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                   </div>
 
                   {/* Action buttons */}
-                  {output && !streaming && (
+                  {streaming ? (
+                    <button onClick={handleStop}
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 active:scale-95">
+                      <Square size={11} fill="currentColor" />
+                      Stop Generation
+                    </button>
+                  ) : output && (
                     <div className="flex items-center gap-1">
                       <button onClick={handleDownload}
                         className="flex items-center gap-1.5 text-xs text-white/35 hover:text-white/70 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-all font-medium">

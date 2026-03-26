@@ -1,10 +1,11 @@
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-export async function generateContent(systemPrompt, userMessage, onChunk, projectId = null, onRagUsed = null) {
+export async function generateContent(systemPrompt, userMessage, onChunk, projectId = null, onRagUsed = null, signal = null) {
   const response = await fetch(`${API}/generate`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
+    signal,
     body: JSON.stringify({
       systemPrompt,
       userMessage,
