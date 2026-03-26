@@ -12,7 +12,7 @@ function SectionTitle({ icon: Icon, label }) {
   return (
     <div className="flex items-center gap-2 mb-4">
       <Icon size={14} className="text-ember-400" />
-      <span className="text-xs font-bold text-white/40 uppercase tracking-widest">{label}</span>
+      <span className="text-xs font-bold text-white/70 uppercase tracking-widest">{label}</span>
     </div>
   );
 }
@@ -43,7 +43,7 @@ function FieldError({ msg }) {
 function InputField({ label, type = "text", value, onChange, placeholder, error, suffix }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-white/40 uppercase tracking-wide mb-1.5">{label}</label>
+      <label className="block text-xs font-semibold text-white/70 uppercase tracking-wide mb-1.5">{label}</label>
       <div className="relative">
         <input type={type} value={value} onChange={onChange} placeholder={placeholder}
           className={`w-full px-3.5 py-2.5 rounded-xl text-sm text-white/85 placeholder-white/20 border transition-all ${error
@@ -92,7 +92,7 @@ function AvatarSection({ name, avatar, onAvatarChange }) {
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       </div>
       <div>
-        <p className="text-sm font-semibold text-white/80 mb-0.5">{name || "Your Name"}</p>
+        <p className="text-sm font-semibold text-white/90 mb-0.5">{name || "Your Name"}</p>
         <button onClick={() => fileRef.current.click()}
           className="text-xs text-ember-400 hover:text-ember-300 transition-colors">
           Change photo
@@ -103,7 +103,7 @@ function AvatarSection({ name, avatar, onAvatarChange }) {
             Remove
           </button>
         )}
-        <p className="text-xs text-white/20 mt-1">JPG, PNG · Max 2MB</p>
+        <p className="text-xs text-white/45 mt-1">JPG, PNG · Max 2MB</p>
       </div>
     </div>
   );
@@ -135,7 +135,7 @@ function UsageSection({ session }) {
           <p className="text-xs text-ember-400 font-bold uppercase tracking-widest mb-0.5">
             {usage?.plan ? usage.plan.charAt(0).toUpperCase() + usage.plan.slice(1) : "Free"} Plan
           </p>
-          <p className="text-xs text-white/40">Upgrade for unlimited generations</p>
+          <p className="text-xs text-white/65">Upgrade for unlimited generations</p>
         </div>
         <button className="text-xs px-3 py-1.5 rounded-lg font-semibold text-white transition-all hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
@@ -148,15 +148,15 @@ function UsageSection({ session }) {
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
             <Zap size={13} className="text-ember-400" />
-            <span className="text-xs font-semibold text-white/60">Generations</span>
+            <span className="text-xs font-semibold text-white/80">Generations</span>
           </div>
-          <span className="text-xs font-bold text-white/70">{used} / {limit}</span>
+          <span className="text-xs font-bold text-white/85">{used} / {limit}</span>
         </div>
         <div className="w-full h-1.5 rounded-full bg-white/8 overflow-hidden">
           <div className="h-full rounded-full transition-all duration-500"
             style={{ width: `${pct}%`, background: pct > 80 ? "linear-gradient(90deg, #f97316, #ef4444)" : "linear-gradient(90deg, #ff6b35, #f54e1e)" }} />
         </div>
-        <p className="text-xs text-white/25 mt-1.5">{limit - used} generations remaining this month</p>
+        <p className="text-xs text-white/45 mt-1.5">{limit - used} generations remaining this month</p>
       </div>
 
       {/* Stats row */}
@@ -171,7 +171,7 @@ function UsageSection({ session }) {
         <div className="p-3.5 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-1.5 mb-1">
             <TrendingUp size={12} className="text-jade-400" />
-            <span className="text-xs text-white/40">Member Since</span>
+            <span className="text-xs text-white/65">Member Since</span>
           </div>
           <p className="text-sm font-bold text-white">
             {session?.createdAt ? new Date(session.createdAt).toLocaleDateString("en-US", { month: "short", year: "numeric" }) : "Today"}
@@ -182,7 +182,7 @@ function UsageSection({ session }) {
       {/* Recent tools */}
       {recentTools.length > 0 && (
         <div>
-          <p className="text-xs text-white/30 mb-2">Recently used tools</p>
+          <p className="text-xs text-white/55 mb-2">Recently used tools</p>
           <div className="flex flex-col gap-1.5">
             {recentTools.map(item => (
               <div key={item.id} className="flex items-center gap-2.5 px-3 py-2 rounded-lg"
@@ -231,8 +231,8 @@ function DangerZone({ onDeleteAccount }) {
         </div>
       </div>
       <div className="p-4">
-        <p className="text-sm font-semibold text-white/80 mb-1">Delete Account</p>
-        <p className="text-xs text-white/35 leading-relaxed mb-4">
+        <p className="text-sm font-semibold text-white/95 mb-1">Delete Account</p>
+        <p className="text-xs text-white/60 leading-relaxed mb-4">
           Permanently deletes your account and all data. This cannot be undone.
         </p>
 
@@ -407,7 +407,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
               )}
               <div>
                 <p className="text-sm font-bold text-white">{name || "Your Profile"}</p>
-                <p className="text-xs text-white/35">{email}</p>
+                <p className="text-xs text-white/65">{email}</p>
               </div>
             </div>
             <button onClick={onClose}
@@ -474,7 +474,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
                   <div className="flex items-start gap-3 p-3.5 rounded-xl"
                     style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.15)" }}>
                     <AlertCircle size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-xs text-blue-300/70 leading-relaxed">
+                    <p className="text-xs text-blue-300/85 leading-relaxed">
                       You signed in with Google. Password change is not available for Google accounts.
                     </p>
                   </div>
@@ -515,8 +515,8 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
                   <div className="flex items-center justify-between p-4 rounded-xl"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
                     <div>
-                      <p className="text-sm font-medium text-white/80">Sign out everywhere</p>
-                      <p className="text-xs text-white/35 mt-0.5">Revoke all active sessions on all devices</p>
+                      <p className="text-sm font-medium text-white/90">Sign out everywhere</p>
+                      <p className="text-xs text-white/60 mt-0.5">Revoke all active sessions on all devices</p>
                     </div>
                     <button onClick={onLogout}
                       className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium text-white/50 hover:text-red-400 border border-white/8 hover:border-red-500/30 hover:bg-red-500/8 transition-all">
@@ -531,7 +531,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
             {tab === "danger" && (
               <div>
                 <SectionTitle icon={Trash2} label="Danger Zone" />
-                <p className="text-xs text-white/35 leading-relaxed mb-5">
+                <p className="text-xs text-white/60 leading-relaxed mb-5">
                   These actions are irreversible. Please proceed with caution.
                 </p>
                 <DangerZone onDeleteAccount={handleDeleteAccount} />
