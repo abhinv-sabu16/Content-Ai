@@ -133,9 +133,9 @@ function OverviewTab({ stats, system, loading }) {
             <StatCard icon={Cpu} label="Node.js" value={system.server?.nodeVersion} color="#38bdf8" />
             <StatCard icon={MemoryStick} label="Memory" value={`${system.server?.memoryMB}MB`} color="#a78bfa" />
             <StatCard icon={Clock} label="Uptime" value={`${Math.floor((system.server?.uptime || 0) / 60)}m`} color="#3fffa2" />
-            <StatCard icon={Server} label="Ollama" value={system.ollama?.status}
-              color={system.ollama?.status === "online" ? "#3fffa2" : "#f87171"}
-              sub={system.ollama?.model} />
+            <StatCard icon={Zap} label="Groq" value="Online"
+              color="#818cf8"
+              sub="Llama 3.1 (8B)" />
           </div>
         </div>
       )}
