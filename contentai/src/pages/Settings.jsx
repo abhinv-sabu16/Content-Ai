@@ -54,6 +54,14 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handleSelectModel = (m) => {
+    const next = { ...settings, activeModel: m };
+    setSettings(next);
+    localStorage.setItem("contentai_settings", JSON.stringify(next));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
   const inputClass = "w-full bg-ink-700 border border-white/8 rounded-xl px-4 py-2.5 text-sm text-white/90 placeholder-white/20 focus:border-ember-500/50 transition-colors";
 
   const isOnline = aiStatus?.status === "online";
@@ -144,7 +152,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
                     const isActive = (settings.activeModel || aiStatus.activeModel) === m;
                     return (
                       <button key={m}
-                        onClick={() => set("activeModel", m)}
+                        onClick={() => handleSelectModel(m)}
                         className="flex items-center justify-between px-3.5 py-2.5 rounded-xl transition-all hover:bg-white/5 active:scale-[0.98] w-full text-left"
                         style={{
                           background: isActive ? modelStyle.activeBg : "rgba(255,255,255,0.03)",
