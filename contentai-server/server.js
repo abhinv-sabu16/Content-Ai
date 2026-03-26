@@ -37,10 +37,8 @@ app.use(cors({
       "http://localhost:3000",
     ].filter(Boolean);
 
-    // Exact match
     if (allowed.includes(origin)) return callback(null, true);
 
-    // Allow all Vercel preview deployments
     if (origin.match(/https:\/\/.*\.vercel\.app$/)) return callback(null, true);
 
     callback(new Error(`CORS: origin ${origin} not allowed`));
@@ -69,6 +67,29 @@ app.use("/history", historyRoutes);
 app.get("/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
+
+// ✅ ADDED: Root route
+app.get("/", (req, res) => {
+  res.json({
+    message: "ContentAI API is running 🚀",
+    endpoints: [
+      "/auth",
+      "/users",
+      "/generate",
+      "/projects",
+      "/admin",
+      "/history",
+      "/health"
+    ]
+  });
+});
+
+// ✅ ADDED: Handle HEAD requests
+app.head("/", (req, res) => {
+  res.status(200).end();
+});
+
 
 app.use((req, res) => {
   logError({
