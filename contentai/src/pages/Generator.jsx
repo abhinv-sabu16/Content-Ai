@@ -140,6 +140,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
   const [error, setError] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const [ragUsed, setRagUsed] = useState(false);
+  const [hasGenerated, setHasGenerated] = useState(false);
   const outputRef = useRef(null);
   const abortControllerRef = useRef(null);
 
@@ -155,7 +156,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
     const toolId = searchParams.get("tool");
     if (toolId) {
       const tool = TOOLS.find(t => t.id === toolId);
-      if (tool) { setSelectedTool(tool); setFields({}); setOutput(""); setRagUsed(false); }
+      if (tool) { setSelectedTool(tool); setFields({}); setOutput(""); setRagUsed(false); setHasGenerated(false); }
     }
   }, [searchParams]);
 
@@ -202,6 +203,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
 
       incrementUsage();
       await saveToHistory({ toolId: selectedTool.id, toolName: selectedTool.name, fields, output: result });
+      setHasGenerated(true);
     } catch (err) {
       if (err.name === "AbortError") {
         console.log("Generation cancelled by user.");
@@ -343,7 +345,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                         <FieldInput
                           field={field}
                           value={fields[field.key] || ""}
-                          onChange={val => setFields(f => ({ ...f, [field.key]: val }))}
+                          onChange={val => { setFields(f => ({ ...f, [field.key]: val })); setHasGenerated(false); }}
                         />
                       </div>
                     ))}
@@ -352,11 +354,11 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                   {/* RAG selector */}
                   <div className="mb-4">
                     <p className="text-xs font-semibold text-white/30 uppercase tracking-wide mb-2">Context</p>
-                    <RagSelector
-                      projects={projects}
-                      selectedProjectId={selectedProjectId}
-                      onChange={setSelectedProjectId}
-                    />
+                  <RagSelector
+                    projects={projects}
+                    selectedProjectId={selectedProjectId}
+                    onChange={(val) => { setSelectedProjectId(val); setHasGenerated(false); }}
+                  />
                   </div>
 
                   {/* Error */}
@@ -382,10 +384,15 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                   )}
                   <button
                     onClick={streaming ? handleStop : handleGenerate}
+                    disabled={hasGenerated && !streaming}
                     className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all active:scale-[0.98] ${
-                      streaming ? "text-red-400 border border-red-500/30 bg-red-500/10" : "text-white shadow-lg shadow-ember-500/10"
+                      streaming
+                        ? "text-red-400 border border-red-500/30 bg-red-500/10"
+                        : hasGenerated
+                        ? "text-white/30 cursor-not-allowed"
+                        : "text-white shadow-lg shadow-ember-500/10"
                     }`}
-                    style={!streaming ? { background: "linear-gradient(135deg, #ff6b35, #f54e1e)" } : {}}>
+                    style={!streaming && !hasGenerated ? { background: "linear-gradient(135deg, #ff6b35, #f54e1e)" } : !streaming && hasGenerated ? { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" } : {}}>
                     {streaming ? (
                       <>
                         <RefreshCw size={14} className="animate-spin" />
@@ -397,6 +404,9 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                       <>{selectedProjectId ? "Generate with RAG" : "Generate Content"}</>
                     )}
                   </button>
+                  {hasGenerated && !streaming && (
+                    <p className="text-xs text-center text-white/25 mt-2">Modify a field to regenerate</p>
+                  )}
                 </div>
               </div>
 
