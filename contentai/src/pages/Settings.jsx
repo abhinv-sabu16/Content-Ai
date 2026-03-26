@@ -119,11 +119,11 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
                         : "No AI provider available"
                     }
                   </p>
-                  {isOnline && aiStatus?.activeModel && (
+                  {isOnline && (aiStatus?.activeModel || settings.activeModel) && (
                     <p className="text-xs text-white/35 mt-0.5">
                       Active model:{" "}
                       <span className="font-mono" style={{ color: statusStyle.color }}>
-                        {aiStatus.activeModel}
+                        {settings.activeModel || aiStatus.activeModel}
                       </span>
                     </p>
                   )}
