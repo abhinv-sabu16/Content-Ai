@@ -148,7 +148,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
                   : "These models are installed locally via Ollama."
                 }>
                 <div className="flex flex-col gap-2">
-                  {aiStatus.availableModels.map(m => {
+                  {[...new Set([...(aiStatus.availableModels || []), settings.activeModel || aiStatus.activeModel].filter(Boolean))].map(m => {
                     const isActive = (settings.activeModel || aiStatus.activeModel) === m;
                     return (
                       <button key={m}
