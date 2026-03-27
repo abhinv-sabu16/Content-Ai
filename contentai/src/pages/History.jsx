@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { IoTrashOutline, IoCopyOutline, IoCheckmarkOutline, IoSearchOutline, IoCalendarOutline, IoFilterOutline, IoReloadOutline, IoSyncOutline } from "react-icons/io5";;
+import { IoTrashOutline, IoCopyOutline, IoCheckmarkOutline, IoSearchOutline, IoCalendarOutline, IoFilterOutline, IoReloadOutline, IoSyncOutline, IoCloseOutline } from "react-icons/io5";;
 import TopBar from "../components/TopBar";
 import { getHistory, deleteFromHistory, clearHistory } from "../lib/history";
 import { TOOLS } from "../lib/tools";
@@ -86,10 +86,10 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
         onOpenProfile={onOpenProfile}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
 
         {/* ── List ── */}
-        <div className="w-80 flex-shrink-0 flex flex-col border-r border-white/5 overflow-hidden bg-ink-900">
+        <div className={`w-full md:w-80 flex-shrink-0 border-r border-white/5 bg-ink-900 overflow-hidden ${selected ? "hidden md:flex flex-col" : "flex flex-col flex-1 md:flex-none"}`}>
           <div className="p-4 border-b border-white/5 flex flex-col gap-3">
             {/* IoSearchOutline */}
             <div className="relative">
@@ -175,7 +175,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
         </div>
 
         {/* ── Detail ── */}
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className={`flex-1 flex-col min-h-0 bg-ink-950 ${!selected ? "hidden md:flex" : "flex"}`}>
           {!selected ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center text-white/20 gap-3">
               <IoCalendarOutline size={32} className="opacity-30" />
@@ -184,14 +184,17 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
           ) : (
             <>
               <div className="flex items-center justify-between px-5 py-3 border-b border-white/5">
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{TOOLS.find(t => t.id === selected.toolId)?.icon || "📄"}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{selected.toolName}</p>
-                    <p className="text-xs text-white/30">{new Date(selected.createdAt).toLocaleString()}</p>
+                <div className="flex items-center gap-3 min-w-0">
+                  <button onClick={() => setSelectedId(null)} className="md:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all">
+                    <IoCloseOutline size={18} />
+                  </button>
+                  <span className="text-xl hidden md:block flex-shrink-0">{TOOLS.find(t => t.id === selected.toolId)?.icon || "📄"}</span>
+                  <div className="min-w-0 truncate">
+                    <p className="text-sm font-semibold text-white truncate">{selected.toolName}</p>
+                    <p className="text-xs text-white/30 truncate">{new Date(selected.createdAt).toLocaleString()}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                   <button
                     onClick={e => handleDelete(selected.id, { stopPropagation: () => {} })}
                     disabled={deleting === selected.id}
