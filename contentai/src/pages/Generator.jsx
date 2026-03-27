@@ -137,10 +137,10 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
   const [output, setOutput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [warming, setWarming] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(null); // holds id of copied generation
   const [error, setError] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
-  const [ragUsed, setRagUsed] = useState(false);
+  const [generations, setGenerations] = useState([]); // array of { id, content, toolName, toolIcon, ragUsed, timestamp }
   const [hasGenerated, setHasGenerated] = useState(false);
   const outputRef = useRef(null);
   const abortControllerRef = useRef(null);
@@ -157,13 +157,13 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
     const toolId = searchParams.get("tool");
     if (toolId) {
       const tool = TOOLS.find(t => t.id === toolId);
-      if (tool) { setSelectedTool(tool); setFields({}); setOutput(""); setRagUsed(false); setHasGenerated(false); }
+      if (tool) { setSelectedTool(tool); setFields({}); setGenerations([]); setHasGenerated(false); }
     }
   }, [searchParams]);
 
   useEffect(() => {
     if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight;
-  }, [output]);
+  }, [generations]);
 
   const handleGenerate = async () => {
     if (!selectedTool) return;
@@ -174,16 +174,23 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
     }
     setError("");
     setStreaming(true);
-    setOutput("");
-    setRagUsed(false);
+
+    // Add a new blank generation card
+    const newId = Date.now().toString();
+    setGenerations(prev => [...prev, {
+      id: newId,
+      content: "",
+      toolName: selectedTool.name,
+      toolIcon: selectedTool.icon,
+      ragUsed: false,
+      timestamp: new Date(),
+    }]);
 
     // Setup abort controller
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    const warmingTimer = setTimeout(() => {
-      setWarming(true);
-    }, 6000);
+    const warmingTimer = setTimeout(() => { setWarming(true); }, 6000);
 
     try {
       const systemPrompt = selectedTool.systemPrompt(fields);
@@ -195,10 +202,10 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
         (text) => {
           clearTimeout(warmingTimer);
           setWarming(false);
-          setOutput(text);
+          setGenerations(prev => prev.map(g => g.id === newId ? { ...g, content: text } : g));
         },
         selectedProjectId || null,
-        (used) => setRagUsed(used),
+        (used) => setGenerations(prev => prev.map(g => g.id === newId ? { ...g, ragUsed: used } : g)),
         controller.signal
       );
 
@@ -207,8 +214,13 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
       setHasGenerated(true);
     } catch (err) {
       if (err.name === "AbortError") {
-        console.log("Generation cancelled by user.");
+        // Remove the empty card if aborted before any content
+        setGenerations(prev => {
+          const card = prev.find(g => g.id === newId);
+          return card?.content ? prev : prev.filter(g => g.id !== newId);
+        });
       } else {
+        setGenerations(prev => prev.filter(g => g.id !== newId));
         const msg = err.message || "";
         if (msg.includes("fetch") || msg.includes("NetworkError") || msg.includes("Failed to fetch")) {
           setError("Connection lost. Trying to reach the AI server...");
@@ -235,20 +247,26 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopyGen = (id, content) => {
+    navigator.clipboard.writeText(content);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   };
 
-  const handleDownload = () => {
-    const blob = new Blob([output], { type: "text/plain" });
+  const handleDownloadGen = (gen) => {
+    const blob = new Blob([gen.content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${selectedTool?.name || "content"}-${Date.now()}.txt`;
+    a.download = `${gen.toolName || "content"}-${Date.now()}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleClearSession = () => {
+    setGenerations([]);
+    setHasGenerated(false);
+    setError("");
   };
 
   const filteredTools = activeCategory === "All" ? TOOLS : TOOLS.filter(t => t.category === activeCategory);
@@ -413,6 +431,156 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
 
               {/* ── Output panel ── */}
               <div className="flex-1 flex flex-col min-h-0 bg-ink-950">
+
+                {/* Output toolbar */}
+                <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-ink-900">
+                  <div className="flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full ${streaming ? (warming ? "bg-ember-500 animate-bounce" : "bg-ember-400 animate-pulse") : generations.length > 0 ? "bg-jade-400" : "bg-white/15"}`} />
+                    <span className="text-xs font-medium text-white/40">
+                      {streaming ? (warming ? "Warming up model…" : "Generating…") : generations.length > 0 ? `${generations.length} generation${generations.length > 1 ? "s" : ""}` : "Output"}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {streaming ? (
+                      <button onClick={handleStop}
+                        className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 active:scale-95">
+                        <Square size={11} fill="currentColor" />
+                        Stop Generation
+                      </button>
+                    ) : generations.length > 0 && (
+                      <button onClick={handleClearSession}
+                        className="flex items-center gap-1.5 text-xs text-white/25 hover:text-white/60 px-2 py-1 rounded-lg hover:bg-white/5 transition-all">
+                        <Trash2 size={11} /> Clear session
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Output body */}
+                <div ref={outputRef} className="flex-1 overflow-auto">
+
+                  {/* Empty state */}
+                  {generations.length === 0 && !streaming && (
+                    <div className="h-full flex flex-col items-center justify-center text-center px-8">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                        style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        <RefreshCw size={18} className="text-white/20" />
+                      </div>
+                      <p className="text-sm font-medium text-white/30 mb-1">No output yet</p>
+                      <p className="text-xs text-white/15 max-w-xs leading-relaxed">
+                        {selectedProjectId
+                          ? "Fill in the fields above and click Generate. Your knowledge base will be used as context."
+                          : "Fill in the fields on the left and click Generate to see your content here."
+                        }
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Stacked generation cards */}
+                  <div className="flex flex-col gap-0">
+                    {generations.map((gen, idx) => {
+                      const isLast = idx === generations.length - 1;
+                      const isStreaming = isLast && streaming;
+                      const isEmptySkeleton = isStreaming && !gen.content;
+
+                      return (
+                        <div key={gen.id} className="border-b border-white/5 last:border-0">
+                          {/* Card header */}
+                          <div className="flex items-center justify-between px-6 pt-5 pb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="text-base">{gen.toolIcon}</span>
+                              <span className="text-xs font-semibold text-white/30 uppercase tracking-widest">{gen.toolName}</span>
+                              <span className="text-white/10 mx-0.5">·</span>
+                              <span className="text-xs text-white/20">
+                                {gen.timestamp.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                              </span>
+                              {gen.ragUsed && (
+                                <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded"
+                                  style={{ background: "rgba(255,107,53,0.1)", color: "#ff6b35", border: "1px solid rgba(255,107,53,0.2)" }}>
+                                  <Database size={9} /> RAG
+                                </span>
+                              )}
+                              {idx > 0 && (
+                                <span className="text-xs px-2 py-0.5 rounded-full text-white/25"
+                                  style={{ background: "rgba(255,255,255,0.05)" }}>
+                                  #{idx + 1}
+                                </span>
+                              )}
+                            </div>
+                            {!isStreaming && gen.content && (
+                              <div className="flex items-center gap-1">
+                                <button onClick={() => handleDownloadGen(gen)}
+                                  className="flex items-center gap-1 text-xs text-white/25 hover:text-white/60 px-2 py-1 rounded-lg hover:bg-white/5 transition-all">
+                                  <Download size={11} /> Export
+                                </button>
+                                <button onClick={() => handleCopyGen(gen.id, gen.content)}
+                                  className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg transition-all"
+                                  style={copied === gen.id
+                                    ? { background: "rgba(63,255,162,0.1)", color: "#3fffa2", border: "1px solid rgba(63,255,162,0.2)" }
+                                    : { background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                                  {copied === gen.id ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy</>}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Skeleton while streaming with no content yet */}
+                          {isEmptySkeleton ? (
+                            <div className="px-6 pb-6 space-y-3">
+                              {[100, 85, 92, 70].map((w, i) => (
+                                <div key={i} className="h-3 rounded animate-pulse"
+                                  style={{ width: `${w}%`, background: "rgba(255,255,255,0.06)", animationDelay: `${i * 0.1}s` }} />
+                              ))}
+                            </div>
+                          ) : (
+                            /* Markdown content */
+                            <div className={`px-6 pb-6 ${isStreaming ? "output-streaming" : "animate-fade-in"}`}>
+                              <ReactMarkdown
+                                components={{
+                                  h1: ({ children }) => <h1 className="text-2xl font-display font-bold text-white mt-4 mb-3 leading-tight">{children}</h1>,
+                                  h2: ({ children }) => <h2 className="text-xl font-display font-bold text-white/90 mt-4 mb-2.5 leading-tight">{children}</h2>,
+                                  h3: ({ children }) => <h3 className="text-base font-display font-semibold text-white/85 mt-3 mb-2">{children}</h3>,
+                                  h4: ({ children }) => <h4 className="text-sm font-semibold text-white/80 mt-3 mb-1.5 uppercase tracking-wide">{children}</h4>,
+                                  p: ({ children }) => <p className="text-sm text-white/75 leading-7 mb-3" style={{ fontFamily: "'DM Sans', sans-serif" }}>{children}</p>,
+                                  ul: ({ children }) => <ul className="space-y-1.5 mb-4 ml-1">{children}</ul>,
+                                  ol: ({ children }) => <ol className="space-y-1.5 mb-4 ml-1 list-decimal list-inside">{children}</ol>,
+                                  li: ({ children }) => (
+                                    <li className="flex items-start gap-2.5 text-sm text-white/75 leading-6">
+                                      <span className="w-1.5 h-1.5 rounded-full bg-ember-400 flex-shrink-0 mt-2" />
+                                      <span>{children}</span>
+                                    </li>
+                                  ),
+                                  strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+                                  em: ({ children }) => <em className="italic text-white/60">{children}</em>,
+                                  code: ({ inline, children }) => inline
+                                    ? <code className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,107,53,0.12)", color: "#ff6b35" }}>{children}</code>
+                                    : <pre className="rounded-xl p-4 mb-4 overflow-auto" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}><code className="text-xs font-mono text-white/70 leading-6">{children}</code></pre>,
+                                  blockquote: ({ children }) => (
+                                    <blockquote className="pl-4 my-3 italic text-white/50 text-sm leading-6" style={{ borderLeft: "3px solid #ff6b35" }}>{children}</blockquote>
+                                  ),
+                                  hr: () => <hr className="my-5 border-white/8" />,
+                                  a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-ember-400 underline underline-offset-2 hover:text-ember-300 transition-colors">{children}</a>,
+                                }}
+                              >
+                                {gen.content}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
                 {/* Output toolbar */}
                 <div className="flex items-center justify-between px-5 py-3 border-b border-white/5 bg-ink-900">
