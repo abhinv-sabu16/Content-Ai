@@ -273,7 +273,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
           <button onClick={handleSave}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm text-white transition-all active:scale-95"
             style={{ background: saved ? "rgba(63,255,162,0.15)" : "linear-gradient(135deg, #ff6b35, #f54e1e)", color: saved ? "#3fffa2" : "white" }}>
-            {saved ? <><IoCheckmarkOutline size={15} /> Saved!</> : <><IoSaveOutline size={15} /> IoSaveOutline Settings</>}
+            {saved ? <><IoCheckmarkOutline size={15} /> Saved!</> : <><IoSaveOutline size={15} /> Save Settings</>}
           </button>
 
         </div>

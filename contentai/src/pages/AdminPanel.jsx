@@ -573,7 +573,7 @@ function ErrorsTab() {
 // ── Main Admin page ───────────────────────────────────────────
 const TABS = [
   { id: "overview", icon: IoStarOutline, label: "Overview" },
-  { id: "users", icon: IoPeopleOutline, label: "IoPeopleOutline" },
+  { id: "users", icon: IoPeopleOutline, label: "Users" },
   { id: "errors", icon: IoStarOutline, label: "Error Logs" },
 ];
 

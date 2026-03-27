@@ -207,7 +207,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                     style={copied
                       ? { background: "rgba(63,255,162,0.12)", color: "#3fffa2" }
                       : { background: "rgba(255,107,53,0.12)", color: "#ff6b35" }}>
-                    {copied ? <><IoCheckmarkOutline size={13} /> Copied!</> : <><IoCopyOutline size={13} /> IoCopyOutline</>}
+                    {copied ? <><IoCheckmarkOutline size={13} /> Copied!</> : <><IoCopyOutline size={13} /> Copy</>}
                   </button>
                 </div>
               </div>
