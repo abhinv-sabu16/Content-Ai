@@ -4,12 +4,19 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Auth from "./pages/Auth";
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Generator = lazy(() => import("./pages/Generator"));
-const History = lazy(() => import("./pages/History"));
-const Settings = lazy(() => import("./pages/Settings"));
-const KnowledgeBase = lazy(() => import("./pages/KnowledgeBase"));
-const AdminPanel = lazy(() => import("./pages/AdminPanel"));
+const loadDashboard = () => import("./pages/Dashboard");
+const loadGenerator = () => import("./pages/Generator");
+const loadHistory = () => import("./pages/History");
+const loadSettings = () => import("./pages/Settings");
+const loadKnowledgeBase = () => import("./pages/KnowledgeBase");
+const loadAdminPanel = () => import("./pages/AdminPanel");
+
+const Dashboard = lazy(loadDashboard);
+const Generator = lazy(loadGenerator);
+const History = lazy(loadHistory);
+const Settings = lazy(loadSettings);
+const KnowledgeBase = lazy(loadKnowledgeBase);
+const AdminPanel = lazy(loadAdminPanel);
 import { LogoutPopup, WelcomePopup } from "./components/Popups";
 import ProfileModal from "./components/ProfileModal";
 import { getMe, logout, setCachedUser, clearCachedUser, refreshSession } from "./lib/auth";
@@ -49,6 +56,22 @@ export default function App() {
 
     const params = new URLSearchParams(window.location.search);
     if (params.get("auth") === "success") window.history.replaceState({}, "", "/");
+
+    // Eagerly preload route chunks in background after initial load
+    // This allows fast TTI while making page navigation instant
+    const preloadTimer = setTimeout(() => {
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(() => {
+          loadDashboard(); loadGenerator(); loadHistory();
+          loadSettings(); loadKnowledgeBase(); loadAdminPanel();
+        });
+      } else {
+        loadDashboard(); loadGenerator(); loadHistory();
+        loadSettings(); loadKnowledgeBase(); loadAdminPanel();
+      }
+    }, 1500);
+
+    return () => clearTimeout(preloadTimer);
   }, []);
 
   const handleAuth = (user, isNew = false) => {
@@ -102,7 +125,7 @@ export default function App() {
       <div className="flex min-h-screen bg-ink-950 relative">
         {mobileSidebarOpen && (
           <div 
-            className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-black/60 z-40 lg:hidden transition-opacity"
             onClick={() => setMobileSidebarOpen(false)}
           />
         )}

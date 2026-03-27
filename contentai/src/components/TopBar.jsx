@@ -6,7 +6,7 @@ export default function TopBar({ onToggleSidebar, title, subtitle, session, onOp
     : "U";
 
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-ink-950/80 backdrop-blur-sm sticky top-0 z-10">
+    <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-ink-950/80 md:backdrop-blur-sm sticky top-0 z-10">
       <div className="flex items-center gap-4">
         <button
           onClick={onToggleSidebar}
