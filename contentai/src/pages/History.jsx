@@ -131,9 +131,9 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
               filtered.map(item => {
                 const tool = TOOLS.find(t => t.id === item.toolId);
                 return (
-                  <button key={item.id}
+                  <div key={item.id}
                     onClick={() => setSelectedId(item.id === selectedId ? null : item.id)}
-                    className={`w-full text-left flex items-start gap-3 p-3 rounded-xl border transition-all group ${
+                    className={`w-full cursor-pointer text-left flex items-start gap-3 p-3 rounded-xl border transition-all group ${
                       item.id === selectedId
                         ? "border-ember-500/40 bg-ember-500/8"
                         : "border-white/5 bg-ink-800 hover:border-white/10"
@@ -155,7 +155,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                         : <IoTrashOutline size={12} />
                       }
                     </button>
-                  </button>
+                  </div>
                 );
               })
             )}
