@@ -10,8 +10,8 @@ export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout,
     { to: "/", icon: IoGridOutline, label: "Dashboard" },
     { to: "/generate", icon: IoSparklesOutline, label: "Generate" },
     { to: "/knowledge", icon: IoBookOutline, label: "Knowledge" },
-    { to: "/history", icon: IoTimeOutline, label: "IoTimeOutline" },
-    { to: "/settings", icon: IoSettingsOutline, label: "IoSettingsOutline" },
+    { to: "/history", icon: IoTimeOutline, label: "History" },
+    { to: "/settings", icon: IoSettingsOutline, label: "Settings" },
     // Admin link only visible to admins
     ...(session?.isAdmin ? [{ to: "/admin", icon: IoShieldOutline, label: "Admin", admin: true }] : []),
   ];
