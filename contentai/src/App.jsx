@@ -1,14 +1,15 @@
 import { Analytics } from "@vercel/analytics/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import Dashboard from "./pages/Dashboard";
-import Generator from "./pages/Generator";
-import History from "./pages/History";
-import Settings from "./pages/Settings";
-import KnowledgeBase from "./pages/KnowledgeBase";
-import AdminPanel from "./pages/AdminPanel";
 import Auth from "./pages/Auth";
+
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Generator = lazy(() => import("./pages/Generator"));
+const History = lazy(() => import("./pages/History"));
+const Settings = lazy(() => import("./pages/Settings"));
+const KnowledgeBase = lazy(() => import("./pages/KnowledgeBase"));
+const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 import { LogoutPopup, WelcomePopup } from "./components/Popups";
 import ProfileModal from "./components/ProfileModal";
 import { getMe, logout, setCachedUser, clearCachedUser, refreshSession } from "./lib/auth";
@@ -99,15 +100,17 @@ export default function App() {
           onOpenProfile={openProfile}
         />
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-          <Routes>
-            <Route path="/"          element={<Dashboard     {...pageProps} />} />
-            <Route path="/generate"  element={<Generator     {...pageProps} />} />
-            <Route path="/knowledge" element={<KnowledgeBase {...pageProps} />} />
-            <Route path="/history"   element={<History       {...pageProps} />} />
-            <Route path="/settings"  element={<Settings      {...pageProps} onLogout={() => setShowLogoutPopup(true)} />} />
-            <Route path="/admin"     element={<AdminPanel    {...pageProps} />} />
-            <Route path="*"          element={<Navigate to="/" replace />} />
-          </Routes>
+          <Suspense fallback={<Spinner />}>
+            <Routes>
+              <Route path="/"          element={<Dashboard     {...pageProps} />} />
+              <Route path="/generate"  element={<Generator     {...pageProps} />} />
+              <Route path="/knowledge" element={<KnowledgeBase {...pageProps} />} />
+              <Route path="/history"   element={<History       {...pageProps} />} />
+              <Route path="/settings"  element={<Settings      {...pageProps} onLogout={() => setShowLogoutPopup(true)} />} />
+              <Route path="/admin"     element={<AdminPanel    {...pageProps} />} />
+              <Route path="*"          element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
         </div>
       </div>
 
