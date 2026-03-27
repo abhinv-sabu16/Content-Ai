@@ -94,7 +94,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
             {/* IoSearchOutline */}
             <div className="relative">
               <IoSearchOutline size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-              <input type="text" placeholder="IoSearchOutline history…" value={search}
+              <input type="text" placeholder="Search history…" value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full pl-8 pr-3 py-2 rounded-lg bg-ink-700 border border-white/5 text-sm text-white/80 placeholder-white/20 focus:border-ember-500/30 transition-colors"
                 style={{ outline: "none" }} />

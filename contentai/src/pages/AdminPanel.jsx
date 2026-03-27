@@ -61,9 +61,9 @@ function OverviewTab({ stats, system, loading }) {
     <div className="space-y-6">
       {/* User stats */}
       <div>
-        <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">IoPeopleOutline</p>
+        <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">People</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={IoPeopleOutline} label="Total IoPeopleOutline" value={stats?.users?.total} color="#38bdf8" />
+          <StatCard icon={IoPeopleOutline} label="Total People" value={stats?.users?.total} color="#38bdf8" />
           <StatCard icon={IoTrendingUpOutline} label="New Today" value={stats?.users?.newToday} sub={`+${stats?.users?.newThisWeek || 0} this week`} color="#3fffa2" />
           <StatCard icon={IoPulseOutline} label="Active Today" value={stats?.users?.activeToday} color="#ff6b35" />
           <StatCard icon={IoStarOutline} label="Suspended" value={stats?.users?.suspended} color="#f87171" />
@@ -76,7 +76,7 @@ function OverviewTab({ stats, system, loading }) {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <StatCard icon={IoFlashOutline} label="Total Generated" value={stats?.generations?.total} color="#ff6b35" />
           <StatCard icon={IoStarOutline} label="Avg per User" value={stats?.generations?.avgPerUser} color="#a78bfa" />
-          <StatCard icon={IoStarOutline} label="Admin IoPeopleOutline" value={stats?.users?.admins} color="#eab308" />
+          <StatCard icon={IoStarOutline} label="Admin People" value={stats?.users?.admins} color="#eab308" />
         </div>
       </div>
 
