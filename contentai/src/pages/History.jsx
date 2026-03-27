@@ -3,6 +3,7 @@ import { Trash2, Copy, Check, Search, Calendar, Filter, Loader2, RefreshCw } fro
 import TopBar from "../components/TopBar";
 import { getHistory, deleteFromHistory, clearHistory } from "../lib/history";
 import { TOOLS } from "../lib/tools";
+import ReactMarkdown from "react-markdown";
 
 export default function History({ onToggleSidebar, session, onOpenProfile }) {
   const [history, setHistory] = useState([]);
@@ -219,10 +220,36 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                 </div>
               )}
 
-              <div className="flex-1 overflow-auto p-5">
-                <pre className="font-mono text-sm text-white/75 leading-relaxed whitespace-pre-wrap">
+              <div className="flex-1 overflow-auto p-6 animate-fade-in">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => <h1 className="text-2xl font-display font-bold text-white mt-6 mb-3 leading-tight">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-xl font-display font-bold text-white/90 mt-5 mb-2.5 leading-tight">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-base font-display font-semibold text-white/85 mt-4 mb-2">{children}</h3>,
+                    h4: ({ children }) => <h4 className="text-sm font-semibold text-white/80 mt-3 mb-1.5 uppercase tracking-wide">{children}</h4>,
+                    p: ({ children }) => <p className="text-sm text-white/75 leading-7 mb-3" style={{ fontFamily: "'DM Sans', sans-serif" }}>{children}</p>,
+                    ul: ({ children }) => <ul className="space-y-1.5 mb-4 ml-1">{children}</ul>,
+                    ol: ({ children }) => <ol className="space-y-1.5 mb-4 ml-1 list-decimal list-inside">{children}</ol>,
+                    li: ({ children }) => (
+                      <li className="flex items-start gap-2.5 text-sm text-white/75 leading-6">
+                        <span className="w-1.5 h-1.5 rounded-full bg-ember-400 flex-shrink-0 mt-2" />
+                        <span>{children}</span>
+                      </li>
+                    ),
+                    strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-white/60">{children}</em>,
+                    code: ({ inline, children }) => inline
+                      ? <code className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ background: "rgba(255,107,53,0.12)", color: "#ff6b35" }}>{children}</code>
+                      : <pre className="rounded-xl p-4 mb-4 overflow-auto" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}><code className="text-xs font-mono text-white/70 leading-6">{children}</code></pre>,
+                    blockquote: ({ children }) => (
+                      <blockquote className="pl-4 my-3 italic text-white/50 text-sm leading-6" style={{ borderLeft: "3px solid #ff6b35" }}>{children}</blockquote>
+                    ),
+                    hr: () => <hr className="my-5 border-white/8" />,
+                    a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-ember-400 underline underline-offset-2 hover:text-ember-300 transition-colors">{children}</a>,
+                  }}
+                >
                   {selected.output}
-                </pre>
+                </ReactMarkdown>
               </div>
             </>
           )}
