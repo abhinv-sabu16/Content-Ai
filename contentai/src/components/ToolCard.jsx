@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { IoArrowForwardOutline } from "react-icons/io5";;
 import { useNavigate } from "react-router-dom";
 
 export default function ToolCard({ tool, compact = false }) {
@@ -15,7 +15,7 @@ export default function ToolCard({ tool, compact = false }) {
           <p className="text-sm font-medium text-white/90 truncate">{tool.name}</p>
           <p className="text-xs text-white/40 truncate">{tool.category}</p>
         </div>
-        <ArrowRight size={13} className="text-white/20 group-hover:text-ember-400 transition-colors flex-shrink-0" />
+        <IoArrowForwardOutline size={13} className="text-white/20 group-hover:text-ember-400 transition-colors flex-shrink-0" />
       </button>
     );
   }
@@ -47,7 +47,7 @@ export default function ToolCard({ tool, compact = false }) {
       <div className="flex items-center gap-1.5 text-xs font-medium mt-auto"
         style={{ color: tool.color }}>
         <span>Generate</span>
-        <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
+        <IoArrowForwardOutline size={12} className="group-hover:translate-x-1 transition-transform" />
       </div>
     </button>
   );

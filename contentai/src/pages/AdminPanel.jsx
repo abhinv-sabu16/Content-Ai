@@ -1,11 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import {
-  Users, AlertTriangle, Server, BarChart3, RefreshCw,
-  Trash2, Check, X, Search, ChevronDown, Shield,
-  Zap, Activity, Clock, Globe, Ban, Crown,
-  CheckCircle2, XCircle, Loader2, Eye, RotateCcw,
-  TrendingUp, Database, Cpu, MemoryStick
-} from "lucide-react";
+import { IoPeopleOutline, IoStarOutline, IoSyncOutline, IoTrashOutline, IoCheckmarkOutline, IoCloseOutline, IoSearchOutline, IoChevronDownOutline, IoShieldOutline, IoFlashOutline, IoPulseOutline, IoTimeOutline, IoGlobeOutline, IoCheckmarkCircleOutline, IoReloadOutline, IoEyeOutline, IoTrendingUpOutline, IoServerOutline, IoHardwareChipOutline } from "react-icons/io5";;
 import TopBar from "../components/TopBar";
 import {
   getAdminStats, getAdminSystem, getAdminUsers,
@@ -59,7 +53,7 @@ function SectionHeader({ title, action }) {
 function OverviewTab({ stats, system, loading }) {
   if (loading) return (
     <div className="flex items-center justify-center py-20">
-      <Loader2 size={24} className="text-white/20 animate-spin" />
+      <IoReloadOutline size={24} className="text-white/20 animate-spin" />
     </div>
   );
 
@@ -67,12 +61,12 @@ function OverviewTab({ stats, system, loading }) {
     <div className="space-y-6">
       {/* User stats */}
       <div>
-        <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">Users</p>
+        <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">IoPeopleOutline</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={Users} label="Total Users" value={stats?.users?.total} color="#38bdf8" />
-          <StatCard icon={TrendingUp} label="New Today" value={stats?.users?.newToday} sub={`+${stats?.users?.newThisWeek || 0} this week`} color="#3fffa2" />
-          <StatCard icon={Activity} label="Active Today" value={stats?.users?.activeToday} color="#ff6b35" />
-          <StatCard icon={Ban} label="Suspended" value={stats?.users?.suspended} color="#f87171" />
+          <StatCard icon={IoPeopleOutline} label="Total IoPeopleOutline" value={stats?.users?.total} color="#38bdf8" />
+          <StatCard icon={IoTrendingUpOutline} label="New Today" value={stats?.users?.newToday} sub={`+${stats?.users?.newThisWeek || 0} this week`} color="#3fffa2" />
+          <StatCard icon={IoPulseOutline} label="Active Today" value={stats?.users?.activeToday} color="#ff6b35" />
+          <StatCard icon={IoStarOutline} label="Suspended" value={stats?.users?.suspended} color="#f87171" />
         </div>
       </div>
 
@@ -80,9 +74,9 @@ function OverviewTab({ stats, system, loading }) {
       <div>
         <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">Generations</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <StatCard icon={Zap} label="Total Generated" value={stats?.generations?.total} color="#ff6b35" />
-          <StatCard icon={BarChart3} label="Avg per User" value={stats?.generations?.avgPerUser} color="#a78bfa" />
-          <StatCard icon={Crown} label="Admin Users" value={stats?.users?.admins} color="#eab308" />
+          <StatCard icon={IoFlashOutline} label="Total Generated" value={stats?.generations?.total} color="#ff6b35" />
+          <StatCard icon={IoStarOutline} label="Avg per User" value={stats?.generations?.avgPerUser} color="#a78bfa" />
+          <StatCard icon={IoStarOutline} label="Admin IoPeopleOutline" value={stats?.users?.admins} color="#eab308" />
         </div>
       </div>
 
@@ -103,10 +97,10 @@ function OverviewTab({ stats, system, loading }) {
       <div>
         <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">Errors</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={AlertTriangle} label="Total Logged" value={stats?.errors?.total} color="#f97316" />
-          <StatCard icon={XCircle} label="Unresolved" value={stats?.errors?.unresolved} color="#f87171" />
-          <StatCard icon={Clock} label="Last 24h" value={stats?.errors?.last24h} color="#eab308" />
-          <StatCard icon={BarChart3} label="Last 7 Days" value={stats?.errors?.last7d} color="#a78bfa" />
+          <StatCard icon={IoStarOutline} label="Total Logged" value={stats?.errors?.total} color="#f97316" />
+          <StatCard icon={IoStarOutline} label="Unresolved" value={stats?.errors?.unresolved} color="#f87171" />
+          <StatCard icon={IoTimeOutline} label="Last 24h" value={stats?.errors?.last24h} color="#eab308" />
+          <StatCard icon={IoStarOutline} label="Last 7 Days" value={stats?.errors?.last7d} color="#a78bfa" />
         </div>
       </div>
 
@@ -130,10 +124,10 @@ function OverviewTab({ stats, system, loading }) {
         <div>
           <p className="text-xs font-bold text-white/30 uppercase tracking-widest mb-3">System</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <StatCard icon={Cpu} label="Node.js" value={system.server?.nodeVersion} color="#38bdf8" />
-            <StatCard icon={MemoryStick} label="Memory" value={`${system.server?.memoryMB}MB`} color="#a78bfa" />
-            <StatCard icon={Clock} label="Uptime" value={`${Math.floor((system.server?.uptime || 0) / 60)}m`} color="#3fffa2" />
-            <StatCard icon={Zap} label="Groq" value="Online"
+            <StatCard icon={IoHardwareChipOutline} label="Node.js" value={system.server?.nodeVersion} color="#38bdf8" />
+            <StatCard icon={IoStarOutline} label="Memory" value={`${system.server?.memoryMB}MB`} color="#a78bfa" />
+            <StatCard icon={IoTimeOutline} label="Uptime" value={`${Math.floor((system.server?.uptime || 0) / 60)}m`} color="#3fffa2" />
+            <StatCard icon={IoFlashOutline} label="Groq" value="Online"
               color="#818cf8"
               sub={JSON.parse(localStorage.getItem("contentai_settings") || "{}").activeModel || "Llama 3.1 (8B)"} />
           </div>
@@ -143,7 +137,7 @@ function OverviewTab({ stats, system, loading }) {
   );
 }
 
-// ── Users tab ─────────────────────────────────────────────────
+// ── IoPeopleOutline tab ─────────────────────────────────────────────────
 function UsersTab({ currentUserId }) {
   const [users, setUsers] = useState([]);
   const [total, setTotal] = useState(0);
@@ -206,17 +200,17 @@ function UsersTab({ currentUserId }) {
     <div className="flex gap-5 h-full">
       {/* User list */}
       <div className="flex-1 flex flex-col min-w-0">
-        <SectionHeader title={`Users (${total})`} action={
+        <SectionHeader title={`IoPeopleOutline (${total})`} action={
           <button onClick={load} className="text-xs text-white/30 hover:text-white/60 flex items-center gap-1 transition-colors">
-            <RefreshCw size={11} /> Refresh
+            <IoSyncOutline size={11} /> Refresh
           </button>
         } />
 
         {/* Filters */}
         <div className="flex gap-2 mb-4">
           <div className="relative flex-1">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
-            <input type="text" placeholder="Search name or email…" value={search}
+            <IoSearchOutline size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" />
+            <input type="text" placeholder="IoSearchOutline name or email…" value={search}
               onChange={e => setSearch(e.target.value)}
               className="w-full pl-8 pr-3 py-2 rounded-lg bg-ink-700 border border-white/5 text-sm text-white/80 placeholder-white/20 focus:border-ember-500/30 transition-colors"
               style={{ outline: "none" }} />
@@ -239,7 +233,7 @@ function UsersTab({ currentUserId }) {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 size={20} className="text-white/20 animate-spin" /></div>
+          <div className="flex items-center justify-center py-12"><IoReloadOutline size={20} className="text-white/20 animate-spin" /></div>
         ) : (
           <div className="flex flex-col gap-1.5 overflow-auto">
             {users.map(user => (
@@ -261,8 +255,8 @@ function UsersTab({ currentUserId }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-white/80 truncate">{user.name}</p>
-                    {user.isAdmin && <Crown size={11} className="text-yellow-400 flex-shrink-0" />}
-                    {user.suspended && <Ban size={11} className="text-red-400 flex-shrink-0" />}
+                    {user.isAdmin && <IoStarOutline size={11} className="text-yellow-400 flex-shrink-0" />}
+                    {user.suspended && <IoStarOutline size={11} className="text-red-400 flex-shrink-0" />}
                   </div>
                   <p className="text-xs text-white/30 truncate">{user.email}</p>
                 </div>
@@ -281,7 +275,7 @@ function UsersTab({ currentUserId }) {
         <div className="w-72 flex-shrink-0 flex flex-col">
           <SectionHeader title="User Details" action={
             <button onClick={() => setSelectedUser(null)} className="text-white/30 hover:text-white/60 transition-colors">
-              <X size={14} />
+              <IoCloseOutline size={14} />
             </button>
           } />
 
@@ -327,7 +321,7 @@ function UsersTab({ currentUserId }) {
                 <p className="text-xs font-semibold text-white/50">Generations</p>
                 <button onClick={() => handleResetUsage(selectedUser.id)}
                   className="flex items-center gap-1 text-xs text-white/30 hover:text-ember-400 transition-colors">
-                  <RotateCcw size={11} /> Reset
+                  <IoStarOutline size={11} /> Reset
                 </button>
               </div>
               <div className="w-full h-1.5 rounded-full bg-white/8 overflow-hidden mb-1.5">
@@ -374,7 +368,7 @@ function UsersTab({ currentUserId }) {
                   style={selectedUser.suspended
                     ? { background: "rgba(63,255,162,0.12)", color: "#3fffa2" }
                     : { background: "rgba(239,68,68,0.12)", color: "#f87171" }}>
-                  {selectedUser.suspended ? <><CheckCircle2 size={13} /> Unsuspend</> : <><Ban size={13} /> Suspend</>}
+                  {selectedUser.suspended ? <><IoCheckmarkCircleOutline size={13} /> Unsuspend</> : <><IoStarOutline size={13} /> Suspend</>}
                 </button>
 
                 <button
@@ -384,7 +378,7 @@ function UsersTab({ currentUserId }) {
                   style={selectedUser.isAdmin
                     ? { background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.4)" }
                     : { background: "rgba(234,179,8,0.12)", color: "#eab308" }}>
-                  <Crown size={13} /> {selectedUser.isAdmin ? "Remove Admin" : "Make Admin"}
+                  <IoStarOutline size={13} /> {selectedUser.isAdmin ? "Remove Admin" : "Make Admin"}
                 </button>
               </div>
             </div>
@@ -409,7 +403,7 @@ function UsersTab({ currentUserId }) {
                 ) : (
                   <button onClick={() => setDeleteConfirm(selectedUser.id)}
                     className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-semibold text-red-400 border border-red-500/20 hover:bg-red-500/8 transition-all">
-                    <Trash2 size={13} /> Delete Account
+                    <IoTrashOutline size={13} /> Delete Account
                   </button>
                 )}
               </div>
@@ -478,20 +472,20 @@ function ErrorsTab() {
             </button>
             <button onClick={handleClear} disabled={clearing}
               className="flex items-center gap-1 text-xs text-red-400/60 hover:text-red-400 transition-colors">
-              {clearing ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
+              {clearing ? <IoReloadOutline size={11} className="animate-spin" /> : <IoTrashOutline size={11} />}
               Clear resolved
             </button>
             <button onClick={load} className="text-xs text-white/30 hover:text-white/60 transition-colors">
-              <RefreshCw size={11} />
+              <IoSyncOutline size={11} />
             </button>
           </div>
         } />
 
         {loading ? (
-          <div className="flex items-center justify-center py-12"><Loader2 size={20} className="text-white/20 animate-spin" /></div>
+          <div className="flex items-center justify-center py-12"><IoReloadOutline size={20} className="text-white/20 animate-spin" /></div>
         ) : errors.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <CheckCircle2 size={28} className="text-jade-400/40 mb-3" />
+            <IoCheckmarkCircleOutline size={28} className="text-jade-400/40 mb-3" />
             <p className="text-sm text-white/30">No errors logged</p>
           </div>
         ) : (
@@ -514,7 +508,7 @@ function ErrorsTab() {
                 {!err.resolved && (
                   <button onClick={e => { e.stopPropagation(); handleResolve(err.id); }}
                     className="text-white/20 hover:text-jade-400 transition-colors flex-shrink-0 mt-0.5">
-                    <Check size={14} />
+                    <IoCheckmarkOutline size={14} />
                   </button>
                 )}
               </button>
@@ -528,7 +522,7 @@ function ErrorsTab() {
         <div className="w-80 flex-shrink-0">
           <SectionHeader title="Error Detail" action={
             <button onClick={() => setSelected(null)} className="text-white/30 hover:text-white/60 transition-colors">
-              <X size={14} />
+              <IoCloseOutline size={14} />
             </button>
           } />
           <div className="space-y-3">
@@ -566,7 +560,7 @@ function ErrorsTab() {
               <button onClick={() => handleResolve(selected.id)}
                 className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-semibold transition-all"
                 style={{ background: "rgba(63,255,162,0.12)", color: "#3fffa2" }}>
-                <Check size={13} /> Mark as Resolved
+                <IoCheckmarkOutline size={13} /> Mark as Resolved
               </button>
             )}
           </div>
@@ -578,9 +572,9 @@ function ErrorsTab() {
 
 // ── Main Admin page ───────────────────────────────────────────
 const TABS = [
-  { id: "overview", icon: BarChart3, label: "Overview" },
-  { id: "users", icon: Users, label: "Users" },
-  { id: "errors", icon: AlertTriangle, label: "Error Logs" },
+  { id: "overview", icon: IoStarOutline, label: "Overview" },
+  { id: "users", icon: IoPeopleOutline, label: "IoPeopleOutline" },
+  { id: "errors", icon: IoStarOutline, label: "Error Logs" },
 ];
 
 export default function AdminPanel({ onToggleSidebar, session, onOpenProfile }) {
@@ -620,7 +614,7 @@ export default function AdminPanel({ onToggleSidebar, session, onOpenProfile }) 
         <div className="flex items-center justify-between px-6 py-3 border-b border-white/5"
           style={{ background: "rgba(255,107,53,0.04)" }}>
           <div className="flex items-center gap-2">
-            <Shield size={14} className="text-ember-400" />
+            <IoShieldOutline size={14} className="text-ember-400" />
             <span className="text-xs font-bold text-ember-400 uppercase tracking-widest">Admin Access</span>
           </div>
           <div className="flex items-center gap-3">
@@ -631,7 +625,7 @@ export default function AdminPanel({ onToggleSidebar, session, onOpenProfile }) 
             )}
             <button onClick={loadStats} disabled={statsLoading}
               className="flex items-center gap-1.5 text-xs text-white/30 hover:text-white/60 transition-colors">
-              <RefreshCw size={11} className={statsLoading ? "animate-spin" : ""} />
+              <IoSyncOutline size={11} className={statsLoading ? "animate-spin" : ""} />
               Refresh
             </button>
           </div>

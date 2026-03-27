@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, Check, Sliders, Palette, Cpu, RefreshCw, Wifi, WifiOff, Zap } from "lucide-react";
+import { IoSaveOutline, IoCheckmarkOutline, IoOptionsOutline, IoColorPaletteOutline, IoHardwareChipOutline, IoSyncOutline, IoCloudOutline, IoCloudOfflineOutline, IoFlashOutline } from "react-icons/io5";;
 import TopBar from "../components/TopBar";
 
 const API = import.meta.env.VITE_API_URL || "http://localhost:4000";
@@ -97,17 +97,17 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
         <div className="max-w-2xl mx-auto flex flex-col gap-5">
 
           {/* ── AI Engine ── */}
-          <Section icon={Cpu} title={engineTitle}>
+          <Section icon={IoHardwareChipOutline} title={engineTitle}>
 
             {/* Status card */}
             <div className="flex items-center justify-between p-4 rounded-xl transition-all"
               style={{ background: statusStyle.bg, border: `1px solid ${statusStyle.border}` }}>
               <div className="flex items-center gap-3">
                 {checking
-                  ? <RefreshCw size={16} className="text-white/30 animate-spin" />
+                  ? <IoSyncOutline size={16} className="text-white/30 animate-spin" />
                   : isOnline
-                    ? <Wifi size={16} style={{ color: statusStyle.color }} />
-                    : <WifiOff size={16} className="text-red-400" />
+                    ? <IoCloudOutline size={16} style={{ color: statusStyle.color }} />
+                    : <IoCloudOfflineOutline size={16} className="text-red-400" />
                 }
                 <div>
                   <p className="text-sm font-semibold"
@@ -134,7 +134,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
               </div>
               <button onClick={checkAiStatus} disabled={checking}
                 className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg text-white/40 hover:text-white/70 hover:bg-white/5 border border-white/8 transition-all disabled:opacity-50">
-                <RefreshCw size={12} className={checking ? "animate-spin" : ""} />
+                <IoSyncOutline size={12} className={checking ? "animate-spin" : ""} />
                 Refresh
               </button>
             </div>
@@ -185,7 +185,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
                   {/* Groq */}
                   <div className="p-3 rounded-xl" style={{ background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}>
                     <div className="flex items-center gap-2 mb-2">
-                      <Zap size={13} className="text-indigo-400" />
+                      <IoFlashOutline size={13} className="text-indigo-400" />
                       <p className="text-xs font-semibold text-indigo-400">Option 1 — Groq (Free, Cloud)</p>
                     </div>
                     <p className="text-xs text-white/40 mb-2">Get a free key at console.groq.com then add to your server:</p>
@@ -222,7 +222,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
           </Section>
 
           {/* ── Generation Defaults ── */}
-          <Section icon={Sliders} title="Generation Defaults">
+          <Section icon={IoOptionsOutline} title="Generation Defaults">
             <Field label="Default Tone">
               <select value={settings.defaultTone || "Professional"}
                 onChange={e => set("defaultTone", e.target.value)}
@@ -244,7 +244,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
           </Section>
 
           {/* ── Appearance ── */}
-          <Section icon={Palette} title="Appearance">
+          <Section icon={IoColorPaletteOutline} title="Appearance">
             <Field label="Theme">
               <div className="grid grid-cols-3 gap-2">
                 {["Dark", "Darker", "OLED"].map(theme => (
@@ -273,7 +273,7 @@ export default function Settings({ onToggleSidebar, session, onOpenProfile }) {
           <button onClick={handleSave}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm text-white transition-all active:scale-95"
             style={{ background: saved ? "rgba(63,255,162,0.15)" : "linear-gradient(135deg, #ff6b35, #f54e1e)", color: saved ? "#3fffa2" : "white" }}>
-            {saved ? <><Check size={15} /> Saved!</> : <><Save size={15} /> Save Settings</>}
+            {saved ? <><IoCheckmarkOutline size={15} /> Saved!</> : <><IoSaveOutline size={15} /> IoSaveOutline Settings</>}
           </button>
 
         </div>

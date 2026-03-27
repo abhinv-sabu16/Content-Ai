@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Zap, Eye, EyeOff, ArrowRight, Mail, Lock, User, AlertCircle, CheckCircle2, Sparkles } from "lucide-react";
+import { IoFlashOutline, IoEyeOutline, IoEyeOffOutline, IoArrowForwardOutline, IoMailOutline, IoLockClosedOutline, IoPersonOutline, IoAlertCircleOutline, IoCheckmarkCircleOutline, IoSparklesOutline } from "react-icons/io5";;
 import { login, register, loginWithGoogle } from "../lib/auth";
 
 const FEATURES = [
@@ -29,7 +29,7 @@ function InputField({ icon: Icon, type, placeholder, value, onChange, showToggle
       {showToggle && (
         <button type="button" onClick={onToggle}
           className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-800 transition-colors z-10">
-          {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+          {showPassword ? <IoEyeOffOutline size={15} /> : <IoEyeOutline size={15} />}
         </button>
       )}
     </div>
@@ -152,7 +152,7 @@ export default function AuthPage({ onAuth }) {
         <div className="relative z-10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-            <Zap size={20} fill="white" color="white" />
+            <IoFlashOutline size={20} fill="white" color="white" />
           </div>
           <span className="font-display font-bold text-white text-xl tracking-tight">ContentAI</span>
         </div>
@@ -160,7 +160,7 @@ export default function AuthPage({ onAuth }) {
         {/* Hero */}
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-5">
-            <Sparkles size={13} className="text-ember-400" />
+            <IoSparklesOutline size={13} className="text-ember-400" />
             <span className="text-xs text-ember-400 font-semibold uppercase tracking-widest">AI-Powered Platform</span>
           </div>
           <h2 className="font-display font-bold text-4xl text-white leading-tight mb-4">
@@ -206,7 +206,7 @@ export default function AuthPage({ onAuth }) {
         <div className="lg:hidden flex items-center gap-2 mb-10">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center"
             style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-            <Zap size={16} fill="white" color="white" />
+            <IoFlashOutline size={16} fill="white" color="white" />
           </div>
           <span className="font-display font-bold text-white text-lg">ContentAI</span>
         </div>
@@ -243,7 +243,7 @@ export default function AuthPage({ onAuth }) {
           {success && (
             <div className="flex items-center gap-3 p-4 rounded-xl mb-5 animate-fade-in"
               style={{ background: "rgba(63,255,162,0.08)", border: "1px solid rgba(63,255,162,0.2)" }}>
-              <CheckCircle2 size={18} className="text-jade-400 flex-shrink-0" />
+              <IoCheckmarkCircleOutline size={18} className="text-jade-400 flex-shrink-0" />
               <p className="text-sm text-jade-400 font-medium">
                 {mode === "login" ? "Signing you in…" : "Account created! Redirecting…"}
               </p>
@@ -254,7 +254,7 @@ export default function AuthPage({ onAuth }) {
           {apiError && (
             <div className="flex items-start gap-3 p-4 rounded-xl mb-5 animate-fade-in"
               style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-              <AlertCircle size={15} className="text-red-400 flex-shrink-0 mt-0.5" />
+              <IoAlertCircleOutline size={15} className="text-red-400 flex-shrink-0 mt-0.5" />
               <p className="text-sm text-red-300">{apiError}</p>
             </div>
           )}
@@ -264,20 +264,20 @@ export default function AuthPage({ onAuth }) {
 
             {mode === "register" && (
               <div>
-                <InputField icon={User} type="text" placeholder="Full name"
+                <InputField icon={IoPersonOutline} type="text" placeholder="Full name"
                   value={form.name} onChange={set("name")} error={fieldErrors.name} />
                 {fieldErrors.name && <p className="text-xs text-red-400 mt-1.5 ml-1">{fieldErrors.name}</p>}
               </div>
             )}
 
             <div>
-              <InputField icon={Mail} type="email" placeholder="Email address"
+              <InputField icon={IoMailOutline} type="email" placeholder="Email address"
                 value={form.email} onChange={set("email")} error={fieldErrors.email} />
               {fieldErrors.email && <p className="text-xs text-red-400 mt-1.5 ml-1">{fieldErrors.email}</p>}
             </div>
 
             <div>
-              <InputField icon={Lock} type="password" placeholder="Password"
+              <InputField icon={IoLockClosedOutline} type="password" placeholder="Password"
                 value={form.password} onChange={set("password")} error={fieldErrors.password}
                 showToggle onToggle={() => setShowPass(s => !s)} showPassword={showPass} />
               {fieldErrors.password && <p className="text-xs text-red-400 mt-1.5 ml-1">{fieldErrors.password}</p>}
@@ -302,7 +302,7 @@ export default function AuthPage({ onAuth }) {
                   {mode === "login" ? "Signing in…" : "Creating account…"}
                 </span>
               ) : (
-                <>{mode === "login" ? "Sign In" : "Create Account"} <ArrowRight size={15} /></>
+                <>{mode === "login" ? "Sign In" : "Create Account"} <IoArrowForwardOutline size={15} /></>
               )}
             </button>
 

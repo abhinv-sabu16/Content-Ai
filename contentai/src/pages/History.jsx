@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Trash2, Copy, Check, Search, Calendar, Filter, Loader2, RefreshCw } from "lucide-react";
+import { IoTrashOutline, IoCopyOutline, IoCheckmarkOutline, IoSearchOutline, IoCalendarOutline, IoFilterOutline, IoReloadOutline, IoSyncOutline } from "react-icons/io5";;
 import TopBar from "../components/TopBar";
 import { getHistory, deleteFromHistory, clearHistory } from "../lib/history";
 import { TOOLS } from "../lib/tools";
@@ -91,17 +91,17 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
         {/* ── List ── */}
         <div className="w-80 flex-shrink-0 flex flex-col border-r border-white/5 overflow-hidden bg-ink-900">
           <div className="p-4 border-b border-white/5 flex flex-col gap-3">
-            {/* Search */}
+            {/* IoSearchOutline */}
             <div className="relative">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
-              <input type="text" placeholder="Search history…" value={search}
+              <IoSearchOutline size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-white/30" />
+              <input type="text" placeholder="IoSearchOutline history…" value={search}
                 onChange={e => setSearch(e.target.value)}
                 className="w-full pl-8 pr-3 py-2 rounded-lg bg-ink-700 border border-white/5 text-sm text-white/80 placeholder-white/20 focus:border-ember-500/30 transition-colors"
                 style={{ outline: "none" }} />
             </div>
-            {/* Filter + Refresh */}
+            {/* IoFilterOutline + Refresh */}
             <div className="flex items-center gap-2">
-              <Filter size={12} className="text-white/30 flex-shrink-0" />
+              <IoFilterOutline size={12} className="text-white/30 flex-shrink-0" />
               <select value={filterTool} onChange={e => setFilterTool(e.target.value)}
                 className="flex-1 text-xs bg-ink-700 border border-white/5 rounded-lg px-2 py-1.5 text-white/60 focus:border-ember-500/30 transition-colors"
                 style={{ outline: "none", background: "#1c1c2e" }}>
@@ -110,7 +110,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
               </select>
               <button onClick={load} disabled={loading}
                 className="w-7 h-7 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
-                <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+                <IoSyncOutline size={13} className={loading ? "animate-spin" : ""} />
               </button>
             </div>
           </div>
@@ -118,11 +118,11 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
           <div className="flex-1 overflow-auto p-2 flex flex-col gap-1.5">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 size={20} className="text-white/20 animate-spin" />
+                <IoReloadOutline size={20} className="text-white/20 animate-spin" />
               </div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center text-white/20 gap-2 p-6">
-                <Calendar size={28} className="opacity-40" />
+                <IoCalendarOutline size={28} className="opacity-40" />
                 <p className="text-sm">
                   {history.length === 0 ? "No history yet. Start generating!" : "No results found."}
                 </p>
@@ -151,8 +151,8 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                       disabled={deleting === item.id}
                       className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded text-white/30 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0">
                       {deleting === item.id
-                        ? <Loader2 size={12} className="animate-spin" />
-                        : <Trash2 size={12} />
+                        ? <IoReloadOutline size={12} className="animate-spin" />
+                        : <IoTrashOutline size={12} />
                       }
                     </button>
                   </button>
@@ -167,7 +167,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                 onClick={handleClear}
                 disabled={clearing}
                 className="w-full flex items-center justify-center gap-2 text-xs text-white/30 hover:text-red-400 py-2 rounded-lg hover:bg-red-400/10 transition-all">
-                {clearing ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={11} />}
+                {clearing ? <IoReloadOutline size={11} className="animate-spin" /> : <IoTrashOutline size={11} />}
                 {clearing ? "Clearing…" : "Clear All History"}
               </button>
             </div>
@@ -178,7 +178,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
         <div className="flex-1 flex flex-col min-h-0">
           {!selected ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center text-white/20 gap-3">
-              <Calendar size={32} className="opacity-30" />
+              <IoCalendarOutline size={32} className="opacity-30" />
               <p className="text-sm">Select an item to view its output</p>
             </div>
           ) : (
@@ -196,7 +196,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                     onClick={e => handleDelete(selected.id, { stopPropagation: () => {} })}
                     disabled={deleting === selected.id}
                     className="flex items-center gap-1.5 text-xs text-white/30 hover:text-red-400 px-2.5 py-1.5 rounded-lg hover:bg-red-400/10 transition-all">
-                    {deleting === selected.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                    {deleting === selected.id ? <IoReloadOutline size={13} className="animate-spin" /> : <IoTrashOutline size={13} />}
                     Delete
                   </button>
                   <button onClick={() => handleCopy(selected.output)}
@@ -204,7 +204,7 @@ export default function History({ onToggleSidebar, session, onOpenProfile }) {
                     style={copied
                       ? { background: "rgba(63,255,162,0.12)", color: "#3fffa2" }
                       : { background: "rgba(255,107,53,0.12)", color: "#ff6b35" }}>
-                    {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy</>}
+                    {copied ? <><IoCheckmarkOutline size={13} /> Copied!</> : <><IoCopyOutline size={13} /> IoCopyOutline</>}
                   </button>
                 </div>
               </div>

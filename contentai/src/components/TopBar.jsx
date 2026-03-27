@@ -1,4 +1,4 @@
-import { PanelLeft, Bell, Search } from "lucide-react";
+import { IoMenuOutline, IoNotificationsOutline, IoSearchOutline } from "react-icons/io5";;
 
 export default function TopBar({ onToggleSidebar, title, subtitle, session, onOpenProfile }) {
   const initials = session?.name
@@ -12,7 +12,7 @@ export default function TopBar({ onToggleSidebar, title, subtitle, session, onOp
           onClick={onToggleSidebar}
           className="w-8 h-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 transition-all"
         >
-          <PanelLeft size={16} />
+          <IoMenuOutline size={16} />
         </button>
         <div className="min-w-0 flex-1">
           <h1 className="font-display font-semibold text-white text-base leading-none truncate">{title}</h1>
@@ -22,13 +22,13 @@ export default function TopBar({ onToggleSidebar, title, subtitle, session, onOp
 
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-white/30 text-sm">
-          <Search size={13} />
-          <span className="hidden sm:block">Search...</span>
+          <IoSearchOutline size={13} />
+          <span className="hidden sm:block">IoSearchOutline...</span>
           <kbd className="hidden sm:block text-xs bg-white/10 px-1.5 py-0.5 rounded text-white/20">⌘K</kbd>
         </div>
 
         <button className="relative w-8 h-8 flex items-center justify-center rounded-lg text-white/40 hover:text-white/80 hover:bg-white/5 transition-all">
-          <Bell size={15} />
+          <IoNotificationsOutline size={15} />
           <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-ember-400" />
         </button>
 

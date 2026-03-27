@@ -1,9 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import {
-  Wand2, Copy, Check, Download, RefreshCw, ChevronDown,
-  AlertCircle, BookOpen, X, ChevronUp, Database, Square, Trash2
-} from "lucide-react";
+import { IoSparklesOutline, IoCopyOutline, IoCheckmarkOutline, IoDownloadOutline, IoSyncOutline, IoChevronDownOutline, IoAlertCircleOutline, IoBookOutline, IoCloseOutline, IoChevronUpOutline, IoServerOutline, IoSquareOutline, IoTrashOutline } from "react-icons/io5";;
 import TopBar from "../components/TopBar";
 import { TOOLS, CATEGORIES } from "../lib/tools";
 import { generateContent } from "../lib/api";
@@ -23,7 +20,7 @@ function FieldInput({ field, value, onChange }) {
           <option value="">Select {field.label}</option>
           {field.options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+        <IoChevronDownOutline size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
       </div>
     );
   }
@@ -56,7 +53,7 @@ function RagSelector({ projects, selectedProjectId, onChange }) {
         className="w-full flex items-center justify-between px-3.5 py-2.5 text-left transition-all hover:bg-white/3"
         style={{ background: selectedProjectId ? "rgba(255,107,53,0.07)" : "rgba(255,255,255,0.02)" }}>
         <div className="flex items-center gap-2.5">
-          <Database size={13} className={selectedProjectId ? "text-ember-400" : "text-white/25"} />
+          <IoServerOutline size={13} className={selectedProjectId ? "text-ember-400" : "text-white/25"} />
           <div>
             <p className="text-xs font-semibold text-white/60">Knowledge Base</p>
             <p className="text-xs text-white/35 mt-0.5">
@@ -69,10 +66,10 @@ function RagSelector({ projects, selectedProjectId, onChange }) {
             <button
               onClick={e => { e.stopPropagation(); onChange(""); }}
               className="w-5 h-5 flex items-center justify-center rounded text-white/25 hover:text-white/60 hover:bg-white/10 transition-all">
-              <X size={11} />
+              <IoCloseOutline size={11} />
             </button>
           )}
-          {open ? <ChevronUp size={13} className="text-white/30" /> : <ChevronDown size={13} className="text-white/30" />}
+          {open ? <IoChevronUpOutline size={13} className="text-white/30" /> : <IoChevronDownOutline size={13} className="text-white/30" />}
         </div>
       </button>
 
@@ -81,7 +78,7 @@ function RagSelector({ projects, selectedProjectId, onChange }) {
         <div className="border-t border-white/5">
           {projects.length === 0 ? (
             <div className="px-3.5 py-4 text-center">
-              <BookOpen size={16} className="text-white/15 mx-auto mb-2" />
+              <IoBookOutline size={16} className="text-white/15 mx-auto mb-2" />
               <p className="text-xs text-white/30">No knowledge bases yet.</p>
               <p className="text-xs text-white/20 mt-0.5">
                 Create one in the <span className="text-ember-400/70">Knowledge Base</span> page.
@@ -96,7 +93,7 @@ function RagSelector({ projects, selectedProjectId, onChange }) {
                 }`}>
                 <span className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
                   style={{ background: "rgba(255,255,255,0.06)" }}>
-                  <Wand2 size={10} className="text-white/30" />
+                  <IoSparklesOutline size={10} className="text-white/30" />
                 </span>
                 None — standard generation
               </button>
@@ -111,13 +108,13 @@ function RagSelector({ projects, selectedProjectId, onChange }) {
                   }`}>
                   <span className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
                     style={{ background: selectedProjectId === p.id ? "rgba(255,107,53,0.2)" : "rgba(255,255,255,0.06)" }}>
-                    <BookOpen size={10} className={selectedProjectId === p.id ? "text-ember-400" : "text-white/30"} />
+                    <IoBookOutline size={10} className={selectedProjectId === p.id ? "text-ember-400" : "text-white/30"} />
                   </span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium truncate">{p.name}</p>
                     <p className="text-xs opacity-50">{p.sourceCount || 0} source{p.sourceCount !== 1 ? "s" : ""}</p>
                   </div>
-                  {selectedProjectId === p.id && <Check size={11} className="text-ember-400 flex-shrink-0" />}
+                  {selectedProjectId === p.id && <IoCheckmarkOutline size={11} className="text-ember-400 flex-shrink-0" />}
                 </button>
               ))}
             </div>
@@ -227,7 +224,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
         } else if (msg.includes("timeout") || msg.includes("408") || msg.includes("504")) {
           setError("Ollama is taking a bit longer to wake up. Please wait a moment and try again.");
         } else if (msg.includes("model not found") || msg.includes("404")) {
-          setError("The selected model isn't ready or was removed. Check Settings.");
+          setError("The selected model isn't ready or was removed. IoCheckmarkOutline Settings.");
         } else {
           setError(msg || "Generation failed. Please try again.");
         }
@@ -334,7 +331,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
                 style={{ background: "rgba(255,107,53,0.1)", border: "1px solid rgba(255,107,53,0.2)" }}>
-                <Wand2 size={28} className="text-ember-400" />
+                <IoSparklesOutline size={28} className="text-ember-400" />
               </div>
               <h3 className="font-display font-bold text-white text-xl mb-2">Pick a Tool</h3>
               <p className="text-white/40 text-sm max-w-xs">Select from 8 AI-powered content tools on the left to get started.</p>
@@ -383,7 +380,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                   {/* Error */}
                   {error && (
                     <div className="flex items-start gap-2 p-3 rounded-xl bg-red-500/10 border border-red-500/20">
-                      <AlertCircle size={14} className="text-red-400 mt-0.5 flex-shrink-0" />
+                      <IoAlertCircleOutline size={14} className="text-red-400 mt-0.5 flex-shrink-0" />
                       <p className="text-xs text-red-300">{error}</p>
                     </div>
                   )}
@@ -393,7 +390,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                 <div className="p-5 border-t border-white/5">
                   {selectedProjectId && (
                     <div className="flex items-center gap-2 mb-3 px-1">
-                      <Database size={12} className="text-ember-400 flex-shrink-0" />
+                      <IoServerOutline size={12} className="text-ember-400 flex-shrink-0" />
                       <p className="text-xs text-white/40">
                         Using <span className="text-ember-400 font-medium">
                           {projects.find(p => p.id === selectedProjectId)?.name}
@@ -414,9 +411,9 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                     style={!streaming && !hasGenerated ? { background: "linear-gradient(135deg, #ff6b35, #f54e1e)" } : !streaming && hasGenerated ? { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" } : {}}>
                     {streaming ? (
                       <>
-                        <RefreshCw size={14} className="animate-spin" />
+                        <IoSyncOutline size={14} className="animate-spin" />
                         <span className="opacity-50 mx-1">|</span>
-                        <Square size={13} fill="currentColor" />
+                        <IoSquareOutline size={13} fill="currentColor" />
                         Stop Generation
                       </>
                     ) : (
@@ -445,13 +442,13 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                     {streaming ? (
                       <button onClick={handleStop}
                         className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 active:scale-95">
-                        <Square size={11} fill="currentColor" />
+                        <IoSquareOutline size={11} fill="currentColor" />
                         Stop Generation
                       </button>
                     ) : generations.length > 0 && (
                       <button onClick={handleClearSession}
                         className="flex items-center gap-1.5 text-xs text-white/25 hover:text-white/60 px-2 py-1 rounded-lg hover:bg-white/5 transition-all">
-                        <Trash2 size={11} /> Clear session
+                        <IoTrashOutline size={11} /> Clear session
                       </button>
                     )}
                   </div>
@@ -465,7 +462,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                     <div className="h-full flex flex-col items-center justify-center text-center px-8">
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
                         style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                        <RefreshCw size={18} className="text-white/20" />
+                        <IoSyncOutline size={18} className="text-white/20" />
                       </div>
                       <p className="text-sm font-medium text-white/30 mb-1">No output yet</p>
                       <p className="text-xs text-white/15 max-w-xs leading-relaxed">
@@ -498,7 +495,7 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                               {gen.ragUsed && (
                                 <span className="flex items-center gap-1 text-xs px-1.5 py-0.5 rounded"
                                   style={{ background: "rgba(255,107,53,0.1)", color: "#ff6b35", border: "1px solid rgba(255,107,53,0.2)" }}>
-                                  <Database size={9} /> RAG
+                                  <IoServerOutline size={9} /> RAG
                                 </span>
                               )}
                               {idx > 0 && (
@@ -512,14 +509,14 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
                               <div className="flex items-center gap-1">
                                 <button onClick={() => handleDownloadGen(gen)}
                                   className="flex items-center gap-1 text-xs text-white/25 hover:text-white/60 px-2 py-1 rounded-lg hover:bg-white/5 transition-all">
-                                  <Download size={11} /> Export
+                                  <IoDownloadOutline size={11} /> Export
                                 </button>
                                 <button onClick={() => handleCopyGen(gen.id, gen.content)}
                                   className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg transition-all"
                                   style={copied === gen.id
                                     ? { background: "rgba(63,255,162,0.1)", color: "#3fffa2", border: "1px solid rgba(63,255,162,0.2)" }
                                     : { background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.45)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                                  {copied === gen.id ? <><Check size={11} /> Copied</> : <><Copy size={11} /> Copy</>}
+                                  {copied === gen.id ? <><IoCheckmarkOutline size={11} /> Copied</> : <><IoCopyOutline size={11} /> IoCopyOutline</>}
                                 </button>
                               </div>
                             )}

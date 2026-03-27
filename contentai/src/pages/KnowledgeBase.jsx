@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Plus, Trash2, FileText, Globe, Upload, X, Check,
-  AlertCircle, Loader2, BookOpen, ChevronRight,
-  FolderOpen, Search, Link, File
-} from "lucide-react";
+import { IoAddOutline, IoTrashOutline, IoDocumentTextOutline, IoGlobeOutline, IoCloudUploadOutline, IoCloseOutline, IoCheckmarkOutline, IoAlertCircleOutline, IoReloadOutline, IoBookOutline, IoChevronForwardOutline, IoStarOutline, IoSearchOutline, IoLinkOutline, IoDocumentOutline } from "react-icons/io5";;
 import TopBar from "../components/TopBar";
 import {
   getProjects, createProject, deleteProject,
@@ -13,10 +9,10 @@ import {
 // ── Source type icon ──────────────────────────────────────────
 function SourceIcon({ type, name }) {
   const ext = name?.split(".").pop()?.toLowerCase();
-  if (type === "url") return <Globe size={14} className="text-blue-400 flex-shrink-0" />;
-  if (ext === "pdf") return <FileText size={14} className="text-red-400 flex-shrink-0" />;
-  if (ext === "docx") return <File size={14} className="text-blue-400 flex-shrink-0" />;
-  return <FileText size={14} className="text-white/40 flex-shrink-0" />;
+  if (type === "url") return <IoGlobeOutline size={14} className="text-blue-400 flex-shrink-0" />;
+  if (ext === "pdf") return <IoDocumentTextOutline size={14} className="text-red-400 flex-shrink-0" />;
+  if (ext === "docx") return <IoDocumentOutline size={14} className="text-blue-400 flex-shrink-0" />;
+  return <IoDocumentTextOutline size={14} className="text-white/40 flex-shrink-0" />;
 }
 
 // ── Empty state ───────────────────────────────────────────────
@@ -74,7 +70,7 @@ function CreateProjectModal({ onClose, onCreate }) {
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-display font-bold text-white">New Knowledge Base</h3>
               <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
-                <X size={14} />
+                <IoCloseOutline size={14} />
               </button>
             </div>
 
@@ -101,7 +97,7 @@ function CreateProjectModal({ onClose, onCreate }) {
               <button onClick={handleCreate} disabled={loading}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95 disabled:opacity-60"
                 style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-                {loading ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                {loading ? <IoReloadOutline size={14} className="animate-spin" /> : <IoAddOutline size={14} />}
                 {loading ? "Creating…" : "Create Project"}
               </button>
               <button onClick={onClose} className="px-4 py-2.5 rounded-xl text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all">
@@ -115,7 +111,7 @@ function CreateProjectModal({ onClose, onCreate }) {
   );
 }
 
-// ── Upload zone ───────────────────────────────────────────────
+// ── IoCloudUploadOutline zone ───────────────────────────────────────────────
 function UploadZone({ projectId, onAdded }) {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -178,8 +174,8 @@ function UploadZone({ projectId, onAdded }) {
       {/* Mode toggle */}
       <div className="flex rounded-xl p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)" }}>
         {[
-          { id: false, icon: Upload, label: "Upload File" },
-          { id: true, icon: Link, label: "Add URL" },
+          { id: false, icon: IoCloudUploadOutline, label: "IoCloudUploadOutline IoDocumentOutline" },
+          { id: true, icon: IoLinkOutline, label: "Add URL" },
         ].map(({ id, icon: Icon, label }) => (
           <button key={String(id)} onClick={() => { setUrlMode(id); setError(""); }}
             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-semibold transition-all ${urlMode === id ? "text-white" : "text-white/35 hover:text-white/60"}`}
@@ -190,7 +186,7 @@ function UploadZone({ projectId, onAdded }) {
       </div>
 
       {!urlMode ? (
-        // File drop zone
+        // IoDocumentOutline drop zone
         <div
           onClick={() => !uploading && fileRef.current.click()}
           onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -206,7 +202,7 @@ function UploadZone({ projectId, onAdded }) {
 
           {uploading ? (
             <>
-              <Loader2 size={24} className="text-ember-400 animate-spin" />
+              <IoReloadOutline size={24} className="text-ember-400 animate-spin" />
               <div className="w-full max-w-xs">
                 <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
                   <div className="h-full rounded-full bg-gradient-to-r from-ember-500 to-ember-400 transition-all"
@@ -219,7 +215,7 @@ function UploadZone({ projectId, onAdded }) {
             <>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center"
                 style={{ background: "rgba(255,107,53,0.1)", border: "1px solid rgba(255,107,53,0.2)" }}>
-                <Upload size={18} className="text-ember-400" />
+                <IoCloudUploadOutline size={18} className="text-ember-400" />
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-white/60">Drop file here or <span className="text-ember-400">browse</span></p>
@@ -239,7 +235,7 @@ function UploadZone({ projectId, onAdded }) {
           <button onClick={handleUrl} disabled={!url.trim() || uploading}
             className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-            {uploading ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
+            {uploading ? <IoReloadOutline size={13} className="animate-spin" /> : <IoAddOutline size={13} />}
             {uploading ? "Scraping…" : "Add"}
           </button>
         </div>
@@ -249,14 +245,14 @@ function UploadZone({ projectId, onAdded }) {
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-xl animate-fade-in"
           style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-          <AlertCircle size={13} className="text-red-400 flex-shrink-0" />
+          <IoAlertCircleOutline size={13} className="text-red-400 flex-shrink-0" />
           <p className="text-xs text-red-300">{error}</p>
         </div>
       )}
       {success && (
         <div className="flex items-center gap-2 p-3 rounded-xl animate-fade-in"
           style={{ background: "rgba(63,255,162,0.08)", border: "1px solid rgba(63,255,162,0.2)" }}>
-          <Check size={13} className="text-jade-400 flex-shrink-0" />
+          <IoCheckmarkOutline size={13} className="text-jade-400 flex-shrink-0" />
           <p className="text-xs text-jade-400">{success}</p>
         </div>
       )}
@@ -350,7 +346,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
           <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5">
             <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Knowledge Bases</span>
             <button onClick={() => setShowProjectList(false)} className="text-white/30 hover:text-white/60">
-              <X size={16} />
+              <IoCloseOutline size={16} />
             </button>
           </div>
 
@@ -358,17 +354,17 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
             <button onClick={() => setShowCreate(true)}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-all active:scale-95 hover:opacity-90"
               style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-              <Plus size={15} /> New Project
+              <IoAddOutline size={15} /> New Project
             </button>
           </div>
 
           <div className="flex-1 overflow-auto p-2">
             {loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 size={20} className="text-white/20 animate-spin" />
+                <IoReloadOutline size={20} className="text-white/20 animate-spin" />
               </div>
             ) : projects.length === 0 ? (
-              <EmptyState icon={FolderOpen} title="No projects yet"
+              <EmptyState icon={IoStarOutline} title="No projects yet"
                 subtitle="Create a project to start uploading documents for AI-powered generation." />
             ) : (
               projects.map(project => (
@@ -381,7 +377,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
                   }`}>
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5"
                     style={{ background: "rgba(255,107,53,0.12)" }}>
-                    <BookOpen size={14} className="text-ember-400" />
+                    <IoBookOutline size={14} className="text-ember-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-semibold truncate ${selectedProject?.id === project.id ? "text-ember-300" : "text-white/80"}`}>
@@ -396,8 +392,8 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
                     disabled={deletingId === project.id}
                     className="opacity-0 group-hover:opacity-100 w-6 h-6 flex items-center justify-center rounded text-white/25 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0 mt-0.5">
                     {deletingId === project.id
-                      ? <Loader2 size={12} className="animate-spin" />
-                      : <Trash2 size={12} />
+                      ? <IoReloadOutline size={12} className="animate-spin" />
+                      : <IoTrashOutline size={12} />
                     }
                   </button>
                 </button>
@@ -417,7 +413,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
               <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
                 style={{ background: "rgba(255,107,53,0.1)", border: "1px solid rgba(255,107,53,0.2)" }}>
-                <BookOpen size={28} className="text-ember-400" />
+                <IoBookOutline size={28} className="text-ember-400" />
               </div>
               <h3 className="font-display font-bold text-white text-xl mb-2">Select a Project</h3>
               <p className="text-white/40 text-sm max-w-xs mb-6">Choose a knowledge base to manage documents, or create a new one.</p>
@@ -449,7 +445,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
 
               <div className="flex-1 overflow-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
 
-                {/* Upload zone */}
+                {/* IoCloudUploadOutline zone */}
                 <div className="w-80 flex-shrink-0">
                   <p className="text-xs font-bold text-white/40 uppercase tracking-widest mb-3">Add Sources</p>
                   <UploadZone projectId={selectedProject.id} onAdded={refreshSources} />
@@ -459,7 +455,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
                     style={{ background: "rgba(255,107,53,0.06)", border: "1px solid rgba(255,107,53,0.12)" }}>
                     <p className="text-xs font-semibold text-ember-400 mb-2">💡 How to use in Generator</p>
                     <ol className="text-xs text-white/40 leading-relaxed space-y-1 list-decimal list-inside">
-                      <li>Upload your documents here</li>
+                      <li>IoCloudUploadOutline your documents here</li>
                       <li>Go to the Generator page</li>
                       <li>Select this project in the RAG panel</li>
                       <li>AI will use your docs as context</li>
@@ -478,13 +474,13 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
 
                   {sourcesLoading ? (
                     <div className="flex items-center justify-center py-12">
-                      <Loader2 size={20} className="text-white/20 animate-spin" />
+                      <IoReloadOutline size={20} className="text-white/20 animate-spin" />
                     </div>
                   ) : sources.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <Upload size={28} className="text-white/10 mb-3" />
+                      <IoCloudUploadOutline size={28} className="text-white/10 mb-3" />
                       <p className="text-sm text-white/25">No sources yet</p>
-                      <p className="text-xs text-white/15 mt-1">Upload files or add a URL to get started</p>
+                      <p className="text-xs text-white/15 mt-1">IoCloudUploadOutline files or add a URL to get started</p>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2">
@@ -518,7 +514,7 @@ export default function KnowledgeBase({ onToggleSidebar, session, onOpenProfile 
                           </div>
                           <button onClick={() => handleDeleteSource(source.id)}
                             className="opacity-0 group-hover:opacity-100 w-7 h-7 flex items-center justify-center rounded-lg text-white/25 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0">
-                            <Trash2 size={13} />
+                            <IoTrashOutline size={13} />
                           </button>
                         </div>
                       ))}

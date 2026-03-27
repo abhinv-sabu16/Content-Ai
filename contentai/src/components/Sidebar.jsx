@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Wand2, History, Settings, Zap, LogOut, BookOpen, Shield, X } from "lucide-react";
+import { IoGridOutline, IoSparklesOutline, IoTimeOutline, IoSettingsOutline, IoFlashOutline, IoLogOutOutline, IoBookOutline, IoShieldOutline, IoCloseOutline } from "react-icons/io5";;
 
 export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout, onOpenProfile }) {
   const initials = session?.name
@@ -7,13 +7,13 @@ export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout,
     : "U";
 
   const navItems = [
-    { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-    { to: "/generate", icon: Wand2, label: "Generate" },
-    { to: "/knowledge", icon: BookOpen, label: "Knowledge" },
-    { to: "/history", icon: History, label: "History" },
-    { to: "/settings", icon: Settings, label: "Settings" },
+    { to: "/", icon: IoGridOutline, label: "Dashboard" },
+    { to: "/generate", icon: IoSparklesOutline, label: "Generate" },
+    { to: "/knowledge", icon: IoBookOutline, label: "Knowledge" },
+    { to: "/history", icon: IoTimeOutline, label: "IoTimeOutline" },
+    { to: "/settings", icon: IoSettingsOutline, label: "IoSettingsOutline" },
     // Admin link only visible to admins
-    ...(session?.isAdmin ? [{ to: "/admin", icon: Shield, label: "Admin", admin: true }] : []),
+    ...(session?.isAdmin ? [{ to: "/admin", icon: IoShieldOutline, label: "Admin", admin: true }] : []),
   ];
 
   return (
@@ -28,7 +28,7 @@ export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout,
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
             style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-            <Zap size={16} fill="white" color="white" />
+            <IoFlashOutline size={16} fill="white" color="white" />
           </div>
           {!collapsed && (
             <span className="font-display font-bold text-white tracking-tight text-lg leading-none">
@@ -38,7 +38,7 @@ export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout,
         </div>
         {/* Mobile close button */}
         <button onClick={onClose} className="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/60 hover:bg-white/5 transition-all">
-          <X size={18} />
+          <IoCloseOutline size={18} />
         </button>
       </div>
 
@@ -100,13 +100,13 @@ export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout,
                   <p className="text-xs font-semibold text-white/80 truncate group-hover:text-white/100 transition-colors">
                     {session?.name || "User"}
                   </p>
-                  {session?.isAdmin && <Shield size={10} className="text-yellow-400 flex-shrink-0" />}
+                  {session?.isAdmin && <IoShieldOutline size={10} className="text-yellow-400 flex-shrink-0" />}
                 </div>
                 <p className="text-xs text-white/30 truncate">{session?.email || ""}</p>
               </button>
               <button onClick={onLogout} title="Sign out"
                 className="w-6 h-6 flex items-center justify-center rounded text-white/25 hover:text-red-400 hover:bg-red-400/10 transition-all flex-shrink-0">
-                <LogOut size={13} />
+                <IoLogOutOutline size={13} />
               </button>
             </div>
           </>
@@ -124,7 +124,7 @@ export default function Sidebar({ collapsed, isOpen, onClose, session, onLogout,
             </button>
             <button onClick={onLogout} title="Sign out"
               className="w-8 h-8 flex items-center justify-center rounded-lg text-white/25 hover:text-red-400 hover:bg-red-400/10 transition-all">
-              <LogOut size={14} />
+              <IoLogOutOutline size={14} />
             </button>
           </div>
         )}

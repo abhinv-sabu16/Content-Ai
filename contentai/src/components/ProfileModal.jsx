@@ -1,9 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  X, User, Mail, Lock, Trash2, Camera, Check, AlertCircle,
-  Eye, EyeOff, ChevronRight, Zap, TrendingUp, FileText,
-  Shield, LogOut, Loader2
-} from "lucide-react";
+import { IoCloseOutline, IoPersonOutline, IoMailOutline, IoLockClosedOutline, IoTrashOutline, IoCameraOutline, IoCheckmarkOutline, IoAlertCircleOutline, IoEyeOutline, IoEyeOffOutline, IoChevronForwardOutline, IoFlashOutline, IoTrendingUpOutline, IoDocumentTextOutline, IoShieldOutline, IoLogOutOutline, IoReloadOutline } from "react-icons/io5";;
 import { updateProfile, changePassword, deleteAccount, getUsage } from "../lib/auth";
 import { getHistory } from "../lib/history";
 
@@ -24,7 +20,7 @@ function SaveButton({ loading, saved, onClick, label = "Save Changes" }) {
       style={saved
         ? { background: "rgba(63,255,162,0.15)", color: "#3fffa2" }
         : { background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-      {loading ? <Loader2 size={14} className="animate-spin" /> : saved ? <Check size={14} /> : null}
+      {loading ? <IoReloadOutline size={14} className="animate-spin" /> : saved ? <IoCheckmarkOutline size={14} /> : null}
       {loading ? "Saving…" : saved ? "Saved!" : label}
     </button>
   );
@@ -34,7 +30,7 @@ function FieldError({ msg }) {
   if (!msg) return null;
   return (
     <div className="flex items-center gap-1.5 mt-1.5">
-      <AlertCircle size={12} className="text-red-400 flex-shrink-0" />
+      <IoAlertCircleOutline size={12} className="text-red-400 flex-shrink-0" />
       <p className="text-xs text-red-400">{msg}</p>
     </div>
   );
@@ -87,7 +83,7 @@ function AvatarSection({ name, avatar, onAvatarChange }) {
         <button onClick={() => fileRef.current.click()}
           className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center transition-all hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)", border: "2px solid #13131f" }}>
-          <Camera size={11} color="white" />
+          <IoCameraOutline size={11} color="white" />
         </button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       </div>
@@ -145,7 +141,7 @@ function UsageSection({ session }) {
       <div className="p-4 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Zap size={13} className="text-ember-400" />
+            <IoFlashOutline size={13} className="text-ember-400" />
             <span className="text-xs font-semibold text-white/60">Generations</span>
           </div>
           <span className="text-xs font-bold text-white/70">{used} / {limit}</span>
@@ -161,14 +157,14 @@ function UsageSection({ session }) {
       <div className="grid grid-cols-2 gap-3">
         <div className="p-3.5 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-1.5 mb-1">
-            <FileText size={12} className="text-blue-400" />
+            <IoDocumentTextOutline size={12} className="text-blue-400" />
             <span className="text-xs text-white/40">Total Saved</span>
           </div>
           <p className="text-xl font-bold text-white font-display">{history.length}</p>
         </div>
         <div className="p-3.5 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
           <div className="flex items-center gap-1.5 mb-1">
-            <TrendingUp size={12} className="text-jade-400" />
+            <IoTrendingUpOutline size={12} className="text-jade-400" />
             <span className="text-xs text-white/40">Member Since</span>
           </div>
           <p className="text-sm font-bold text-white">
@@ -224,7 +220,7 @@ function DangerZone({ onDeleteAccount }) {
     <div className="rounded-xl overflow-hidden" style={{ border: "1px solid rgba(239,68,68,0.2)" }}>
       <div className="px-4 py-3" style={{ background: "rgba(239,68,68,0.06)" }}>
         <div className="flex items-center gap-2">
-          <Trash2 size={13} className="text-red-400" />
+          <IoTrashOutline size={13} className="text-red-400" />
           <span className="text-xs font-bold text-red-400 uppercase tracking-widest">Danger Zone</span>
         </div>
       </div>
@@ -238,7 +234,7 @@ function DangerZone({ onDeleteAccount }) {
           <button
             onClick={() => setConfirming(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-red-400 border border-red-500/25 hover:bg-red-500/10 transition-all">
-            <Trash2 size={14} /> Delete my account
+            <IoTrashOutline size={14} /> Delete my account
           </button>
         ) : (
           <div className="space-y-3">
@@ -265,7 +261,7 @@ function DangerZone({ onDeleteAccount }) {
             {error && (
               <div className="flex items-center gap-2 p-2.5 rounded-lg"
                 style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                <AlertCircle size={13} className="text-red-400 flex-shrink-0" />
+                <IoAlertCircleOutline size={13} className="text-red-400 flex-shrink-0" />
                 <p className="text-xs text-red-300">{error}</p>
               </div>
             )}
@@ -277,8 +273,8 @@ function DangerZone({ onDeleteAccount }) {
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
                 style={{ background: isMatch && !loading ? "linear-gradient(135deg, #dc2626, #b91c1c)" : "#3a1a1a" }}>
                 {loading
-                  ? <><Loader2 size={13} className="animate-spin" /> Deleting…</>
-                  : <><Trash2 size={13} /> Confirm Delete</>
+                  ? <><IoReloadOutline size={13} className="animate-spin" /> Deleting…</>
+                  : <><IoTrashOutline size={13} /> Confirm Delete</>
                 }
               </button>
               <button
@@ -299,10 +295,10 @@ function DangerZone({ onDeleteAccount }) {
 // MAIN PROFILE MODAL
 // ─────────────────────────────────────────────────────────────
 const TABS = [
-  { id: "profile", icon: User, label: "Profile" },
-  { id: "usage", icon: TrendingUp, label: "Usage" },
-  { id: "security", icon: Shield, label: "Security" },
-  { id: "danger", icon: Trash2, label: "Account" },
+  { id: "profile", icon: IoPersonOutline, label: "Profile" },
+  { id: "usage", icon: IoTrendingUpOutline, label: "Usage" },
+  { id: "security", icon: IoShieldOutline, label: "Security" },
+  { id: "danger", icon: IoTrashOutline, label: "Account" },
 ];
 
 export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
@@ -410,7 +406,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
             </div>
             <button onClick={onClose}
               className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all">
-              <X size={15} />
+              <IoCloseOutline size={15} />
             </button>
           </div>
 
@@ -433,7 +429,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
             {/* ── Profile Tab ── */}
             {tab === "profile" && (
               <div className="space-y-5">
-                <SectionTitle icon={User} label="Personal Info" />
+                <SectionTitle icon={IoPersonOutline} label="Personal Info" />
                 <AvatarSection name={name} avatar={avatar} onAvatarChange={setAvatar} />
 
                 <InputField label="Full Name" value={name} onChange={e => setName(e.target.value)}
@@ -444,7 +440,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
                 {profileError && (
                   <div className="flex items-center gap-2 p-3 rounded-xl"
                     style={{ background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)" }}>
-                    <AlertCircle size={14} className="text-red-400 flex-shrink-0" />
+                    <IoAlertCircleOutline size={14} className="text-red-400 flex-shrink-0" />
                     <p className="text-xs text-red-300">{profileError}</p>
                   </div>
                 )}
@@ -458,7 +454,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
             {/* ── Usage Tab ── */}
             {tab === "usage" && (
               <div>
-                <SectionTitle icon={TrendingUp} label="Usage & Plan" />
+                <SectionTitle icon={IoTrendingUpOutline} label="Usage & Plan" />
                 <UsageSection session={session} />
               </div>
             )}
@@ -466,12 +462,12 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
             {/* ── Security Tab ── */}
             {tab === "security" && (
               <div className="space-y-5">
-                <SectionTitle icon={Shield} label="Change Password" />
+                <SectionTitle icon={IoShieldOutline} label="Change Password" />
 
                 {session?.googleId && (
                   <div className="flex items-start gap-3 p-3.5 rounded-xl"
                     style={{ background: "rgba(59,130,246,0.07)", border: "1px solid rgba(59,130,246,0.15)" }}>
-                    <AlertCircle size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
+                    <IoAlertCircleOutline size={14} className="text-blue-400 flex-shrink-0 mt-0.5" />
                     <p className="text-xs text-blue-300/70 leading-relaxed">
                       You signed in with Google. Password change is not available for Google accounts.
                     </p>
@@ -484,7 +480,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
                     placeholder="••••••••" error={pwErrors.currentPw} />
                   <button onClick={() => setShowCurrentPw(s => !s)}
                     className="absolute right-3 top-8 text-white/25 hover:text-white/60 transition-colors">
-                    {showCurrentPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {showCurrentPw ? <IoEyeOffOutline size={14} /> : <IoEyeOutline size={14} />}
                   </button>
                 </div>
 
@@ -494,7 +490,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
                     placeholder="Min. 8 characters" error={pwErrors.newPw} />
                   <button onClick={() => setShowNewPw(s => !s)}
                     className="absolute right-3 top-8 text-white/25 hover:text-white/60 transition-colors">
-                    {showNewPw ? <EyeOff size={14} /> : <Eye size={14} />}
+                    {showNewPw ? <IoEyeOffOutline size={14} /> : <IoEyeOutline size={14} />}
                   </button>
                 </div>
 
@@ -509,7 +505,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
 
                 {/* Sign out all devices */}
                 <div className="pt-4 border-t border-white/5">
-                  <SectionTitle icon={LogOut} label="Sessions" />
+                  <SectionTitle icon={IoLogOutOutline} label="Sessions" />
                   <div className="flex items-center justify-between p-4 rounded-xl"
                     style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
                     <div>
@@ -518,7 +514,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
                     </div>
                     <button onClick={onLogout}
                       className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium text-white/50 hover:text-red-400 border border-white/8 hover:border-red-500/30 hover:bg-red-500/8 transition-all">
-                      <LogOut size={12} /> Sign out
+                      <IoLogOutOutline size={12} /> Sign out
                     </button>
                   </div>
                 </div>
@@ -528,7 +524,7 @@ export default function ProfileModal({ session, onClose, onUpdate, onLogout }) {
             {/* ── Danger Tab ── */}
             {tab === "danger" && (
               <div>
-                <SectionTitle icon={Trash2} label="Danger Zone" />
+                <SectionTitle icon={IoTrashOutline} label="Danger Zone" />
                 <p className="text-xs text-white/35 leading-relaxed mb-5">
                   These actions are irreversible. Please proceed with caution.
                 </p>

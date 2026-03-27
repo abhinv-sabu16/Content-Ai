@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { LogOut, X, Sparkles, Zap, ArrowRight, CheckCircle2 } from "lucide-react";
+import { IoLogOutOutline, IoCloseOutline, IoSparklesOutline, IoFlashOutline, IoArrowForwardOutline, IoCheckmarkCircleOutline } from "react-icons/io5";;
 
 // ── Shared backdrop ───────────────────────────────────────────
 function Backdrop({ onClick }) {
@@ -48,13 +48,13 @@ export function LogoutPopup({ onConfirm, onCancel }) {
                 className="w-11 h-11 rounded-xl flex items-center justify-center"
                 style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)" }}
               >
-                <LogOut size={20} className="text-red-400" />
+                <IoLogOutOutline size={20} className="text-red-400" />
               </div>
               <button
                 onClick={onCancel}
                 className="w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white/70 hover:bg-white/5 transition-all"
               >
-                <X size={15} />
+                <IoCloseOutline size={15} />
               </button>
             </div>
 
@@ -80,7 +80,7 @@ export function LogoutPopup({ onConfirm, onCancel }) {
                     Signing out…
                   </span>
                 ) : (
-                  <><LogOut size={14} /> Yes, sign me out</>
+                  <><IoLogOutOutline size={14} /> Yes, sign me out</>
                 )}
               </button>
               <button
@@ -144,7 +144,7 @@ export function WelcomePopup({ userName, onClose }) {
                   className="w-16 h-16 rounded-2xl flex items-center justify-center relative"
                   style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)", boxShadow: "0 0 40px rgba(255,107,53,0.3)" }}
                 >
-                  <Zap size={28} fill="white" color="white" />
+                  <IoFlashOutline size={28} fill="white" color="white" />
                   <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center"
                     style={{ background: "#13131f", border: "2px solid #13131f" }}>
                     <span className="text-xs">✨</span>
@@ -153,7 +153,7 @@ export function WelcomePopup({ userName, onClose }) {
               </div>
 
               <div className="flex items-center justify-center gap-2 mb-3">
-                <Sparkles size={13} className="text-ember-400" />
+                <IoSparklesOutline size={13} className="text-ember-400" />
                 <span className="text-xs text-ember-400 font-semibold uppercase tracking-widest">Account Created</span>
               </div>
 
@@ -170,7 +170,7 @@ export function WelcomePopup({ userName, onClose }) {
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all active:scale-[0.98] hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)", boxShadow: "0 8px 24px rgba(255,107,53,0.25)" }}
               >
-                Show me around <ArrowRight size={15} />
+                Show me around <IoArrowForwardOutline size={15} />
               </button>
               <button onClick={handleClose} className="w-full mt-2.5 py-2 text-xs text-white/25 hover:text-white/50 transition-colors">
                 Skip for now
@@ -217,7 +217,7 @@ export function WelcomePopup({ userName, onClose }) {
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all active:scale-[0.98] hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}
               >
-                Next <ArrowRight size={15} />
+                Next <IoArrowForwardOutline size={15} />
               </button>
             </div>
           )}
@@ -230,7 +230,7 @@ export function WelcomePopup({ userName, onClose }) {
                   className="w-16 h-16 rounded-full flex items-center justify-center"
                   style={{ background: "rgba(63,255,162,0.1)", border: "2px solid rgba(63,255,162,0.25)" }}
                 >
-                  <CheckCircle2 size={32} className="text-jade-400" />
+                  <IoCheckmarkCircleOutline size={32} className="text-jade-400" />
                 </div>
               </div>
 
@@ -267,7 +267,7 @@ export function WelcomePopup({ userName, onClose }) {
                 className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all active:scale-[0.98] hover:opacity-90"
                 style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)", boxShadow: "0 8px 24px rgba(255,107,53,0.2)" }}
               >
-                <Zap size={14} fill="white" /> Start Creating
+                <IoFlashOutline size={14} fill="white" /> Start Creating
               </button>
             </div>
           )}

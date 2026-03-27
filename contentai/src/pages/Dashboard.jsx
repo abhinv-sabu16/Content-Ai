@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Zap, FileText, TrendingUp, Clock, ArrowRight, Sparkles } from "lucide-react";
+import { IoFlashOutline, IoDocumentTextOutline, IoTrendingUpOutline, IoTimeOutline, IoArrowForwardOutline, IoSparklesOutline } from "react-icons/io5";;
 import TopBar from "../components/TopBar";
 import ToolCard from "../components/ToolCard";
 import { TOOLS } from "../lib/tools";
@@ -60,7 +60,7 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
             style={{ background: "radial-gradient(circle at 80% 50%, #ff6b35 0%, transparent 60%)" }} />
           <div className="relative z-10 max-w-xl">
             <div className="flex items-center gap-2 mb-3">
-              <Sparkles size={14} className="text-ember-400" />
+              <IoSparklesOutline size={14} className="text-ember-400" />
               <span className="text-xs text-ember-400 font-semibold uppercase tracking-widest">AI-Powered</span>
             </div>
             <h2 className="font-display font-bold text-2xl md:text-3xl text-white mb-2 leading-tight">
@@ -74,9 +74,9 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
               onClick={() => navigate("/generate")}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
               style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-              <Zap size={14} fill="white" />
+              <IoFlashOutline size={14} fill="white" />
               Start Generating
-              <ArrowRight size={14} />
+              <IoArrowForwardOutline size={14} />
             </button>
           </div>
         </div>
@@ -88,26 +88,26 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
-              icon={Zap}
+              icon={IoFlashOutline}
               label="Total Generated"
               value={stats.total}
               color="#ff6b35"
             />
             <StatCard
-              icon={TrendingUp}
+              icon={IoTrendingUpOutline}
               label="Generated Today"
               value={stats.today}
               color="#34d399"
               sub={stats.today > 0 ? "↑ Active today" : ""}
             />
             <StatCard
-              icon={FileText}
+              icon={IoDocumentTextOutline}
               label="Saved in History"
               value={history.length}
               color="#38bdf8"
             />
             <StatCard
-              icon={Clock}
+              icon={IoTimeOutline}
               label="Plan"
               value={session?.plan || "Free"}
               color="#a78bfa"
@@ -125,7 +125,7 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
             <button
               onClick={() => navigate("/generate")}
               className="text-xs text-ember-400 hover:text-ember-300 flex items-center gap-1">
-              View all <ArrowRight size={11} />
+              View all <IoArrowForwardOutline size={11} />
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -143,7 +143,7 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
               <button
                 onClick={() => navigate("/history")}
                 className="text-xs text-ember-400 hover:text-ember-300 flex items-center gap-1">
-                View all <ArrowRight size={11} />
+                View all <IoArrowForwardOutline size={11} />
               </button>
             </div>
             <div className="flex flex-col gap-2">
@@ -173,7 +173,7 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-4"
               style={{ background: "rgba(255,107,53,0.08)", border: "1px solid rgba(255,107,53,0.15)" }}>
-              <Zap size={24} className="text-ember-400/60" />
+              <IoFlashOutline size={24} className="text-ember-400/60" />
             </div>
             <p className="text-sm font-semibold text-white/40 mb-1">No generations yet</p>
             <p className="text-xs text-white/20 mb-4">Pick a tool and create your first piece of content</p>
@@ -181,7 +181,7 @@ export default function Dashboard({ onToggleSidebar, session, onOpenProfile }) {
               onClick={() => navigate("/generate")}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
               style={{ background: "linear-gradient(135deg, #ff6b35, #f54e1e)" }}>
-              <Zap size={13} fill="white" /> Start Generating
+              <IoFlashOutline size={13} fill="white" /> Start Generating
             </button>
           </div>
         )}
