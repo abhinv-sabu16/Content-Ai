@@ -32,6 +32,7 @@ export default function App() {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     getMe()
@@ -78,7 +79,13 @@ export default function App() {
   };
 
   const openProfile = () => setShowProfile(true);
-  const toggle = () => setCollapsed(c => !c);
+  const toggle = () => {
+    if (window.innerWidth < 1024) {
+      setMobileSidebarOpen(true);
+    } else {
+      setCollapsed(c => !c);
+    }
+  };
 
   if (loading) return <Spinner />;
   if (!session) return <Auth onAuth={handleAuth} />;
@@ -92,9 +99,17 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="flex min-h-screen bg-ink-950">
+      <div className="flex min-h-screen bg-ink-950 relative">
+        {mobileSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileSidebarOpen(false)}
+          />
+        )}
         <Sidebar
           collapsed={collapsed}
+          isOpen={mobileSidebarOpen}
+          onClose={() => setMobileSidebarOpen(false)}
           session={session}
           onLogout={() => setShowLogoutPopup(true)}
           onOpenProfile={openProfile}

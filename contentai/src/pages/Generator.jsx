@@ -278,10 +278,10 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
         onOpenProfile={onOpenProfile}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row">
 
         {/* ── Left: Tool list ── */}
-        <div className="w-72 flex-shrink-0 border-r border-white/5 flex flex-col bg-ink-900 overflow-hidden">
+        <div className={`w-full md:w-72 flex-shrink-0 border-r border-white/5 bg-ink-900 overflow-hidden ${selectedTool ? "hidden md:flex flex-col" : "flex flex-col flex-1 md:flex-none"}`}>
           <div className="p-4 border-b border-white/5">
             <p className="text-xs text-white/40 uppercase tracking-widest font-semibold mb-3">Tools</p>
             <div className="flex flex-wrap gap-1.5">
@@ -343,9 +343,12 @@ export default function Generator({ onToggleSidebar, session, onOpenProfile }) {
               <div className="lg:w-96 w-full flex-shrink-0 flex flex-col border-r border-white/5 overflow-y-auto max-h-[50vh] lg:max-h-none lg:h-full">
                 <div className="p-5 flex-1">
                   {/* Tool header */}
-                  <div className="flex items-center gap-3 mb-5">
-                    <span className="text-2xl">{selectedTool.icon}</span>
-                    <div>
+                  <div className="flex items-start md:items-center gap-3 mb-5">
+                    <button onClick={() => { setSelectedTool(null); navigate("/generate"); }} className="md:hidden flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-all mt-0.5" title="Back to tools">
+                      <IoCloseOutline size={18} />
+                    </button>
+                    <span className="text-2xl mt-1 md:mt-0">{selectedTool.icon}</span>
+                    <div className="min-w-0">
                       <h2 className="font-display font-bold text-white">{selectedTool.name}</h2>
                       <p className="text-xs text-white/40">{selectedTool.description}</p>
                     </div>
