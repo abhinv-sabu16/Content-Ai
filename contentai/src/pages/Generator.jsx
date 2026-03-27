@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import {
   Wand2, Copy, Check, Download, RefreshCw, ChevronDown,
-  AlertCircle, BookOpen, X, ChevronUp, Database, Square
+  AlertCircle, BookOpen, X, ChevronUp, Database, Square, Trash2
 } from "lucide-react";
 import TopBar from "../components/TopBar";
 import { TOOLS, CATEGORIES } from "../lib/tools";
